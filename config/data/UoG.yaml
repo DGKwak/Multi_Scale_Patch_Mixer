@@ -1,0 +1,5 @@
+dataset_name: "UoG"
+data_dir: "/media/eslab/Backup/mmWave_dataset/UoG_dataset"
+input_size: 224
+val_split: 0.2
+random_state: 42
