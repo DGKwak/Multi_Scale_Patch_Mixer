@@ -1,0 +1,16 @@
+defaults:
+  - data:
+      - UoG
+      - transform
+  - _self_
+
+experiment_name: "Reference_code_test"
+model_name : "HireMLP"
+num_classes: 6
+epochs: 200
+learning_rate: 1e-3
+batch_size: 32
+num_workers: 8
+weight_decay: 1e-4
+csv_path: "/home/eslab/Vscode/test_model/results"
+best_model_path: "/home/eslab/Vscode/test_model/checkpoints"
