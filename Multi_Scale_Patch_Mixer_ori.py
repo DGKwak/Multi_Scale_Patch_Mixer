@@ -119,13 +119,13 @@ class MultiscaleMixer(nn.Module):
         
         self.channel_mixer = nn.ModuleList([
             MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
-            for _ in range(2)])
+            for _ in range(len(self.patches))])
         self.inter_mixer = nn.ModuleList([
             MlpBlock(2, x, x*2, x, self.act, self.dropout, residual=False)
             for x in self.num_patches])
         self.intra_mixer = nn.ModuleList([
             MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout, residual=False)
-            for _ in range(2)])
+            for _ in range(len(self.patches))])
         self.mixrep_mixer = nn.ModuleList([
             MlpBlock(2, x, x*2, x, self.act, self.dropout)
             for x in self.num_patches])

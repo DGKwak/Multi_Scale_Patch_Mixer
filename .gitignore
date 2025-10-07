@@ -2,3 +2,6 @@
 /uv.lock
 /results
 /logs
+/outputs
+/__pycache__
+/loss/__pycache__

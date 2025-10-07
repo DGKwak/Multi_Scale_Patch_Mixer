@@ -20,7 +20,7 @@ class Patchify(nn.Module):
         super().__init__()
         self.patch_size = patch_size
         self.embed_dim = embed_dim
-        self.num_patches = (224//patch_size[0]) * (224//patch_size[1])
+        self.num_patches = patch_size[0] * patch_size[1]
         
         self.projection = nn.Sequential(
             nn.Linear(3*self.num_patches, self.embed_dim * 2),
@@ -34,6 +34,7 @@ class Patchify(nn.Module):
         
         x = einops.rearrange(x, 'b c (h p1) (w p2) -> b (h w) (c p1 p2)', p1=self.patch_size[0], p2=self.patch_size[1])
         x = self.projection(x)
+        x = einops.rearrange(x, 'b n d -> b d n')
         return x
 
 class PositionalEmbedding(nn.Module):
@@ -139,13 +140,13 @@ class MultiscaleMixer(nn.Module):
         
         self.channel_mixer = nn.ModuleList([
             MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
-            for _ in range(2)])
+            for _ in range(len(self.patches))])
         self.inter_mixer = nn.ModuleList([
             MlpBlock(2, x, x*2, x, self.act, self.dropout, residual=False)
             for x in self.num_patches])
         self.intra_mixer = nn.ModuleList([
             MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout, residual=False)
-            for _ in range(2)])
+            for _ in range(len(self.num_patches))])
         self.mixrep_mixer = nn.ModuleList([
             MlpBlock(2, x, x*2, x, self.act, self.dropout)
             for x in self.num_patches])
@@ -167,7 +168,7 @@ class MultiscaleMixer(nn.Module):
         for idx in range(len(self.patches)):
             # Patch Embedding
             z = self.patch_embedding[idx](x)
-            z = einops.rearrange(z, 'b c h w -> b c (h w)')
+            # z = einops.rearrange(z, 'b c h w -> b c (h w)')       
 
             # Positional Embedding
             z = self.positional_embedding[idx](z)

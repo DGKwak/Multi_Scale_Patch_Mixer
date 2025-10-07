@@ -99,6 +99,8 @@ def main(cfg):
         'Patch Size': cfg.model.patches,
         'Dropout': cfg.model.dropout,
     }
+
+    print(metadata)
     
     if torch.cuda.is_available():
         device = torch.device('cuda')
