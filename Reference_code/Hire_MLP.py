@@ -17,7 +17,7 @@ from timm.models.layers.helpers import to_2tuple
 def _cfg(url='', **kwargs):
     return {
         'url': url,
-        'num_classes': 1000, 'input_size': (3, 224, 224), 'pool_size': None,
+        'num_classes': 6, 'input_size': (3, 224, 224), 'pool_size': None,
         'crop_pct': 0.9, 'interpolation': 'bicubic',
         'mean': IMAGENET_DEFAULT_MEAN, 'std': IMAGENET_DEFAULT_STD, 'classifier': 'head',
         **kwargs
