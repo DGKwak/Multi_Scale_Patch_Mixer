@@ -1,0 +1,8 @@
+in_channels: 3
+patch_dim: 512
+num_layers: 8
+token_dim: 256
+channel_dim: 2048
+dropout: 0.1
+activation: "gelu"
+patches: 16

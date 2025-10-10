@@ -1,5 +1,39 @@
 #!/bin/bash
 
+# STFT Original MLP-Mixer Test
+uv run Original_MLP_Mixer_test.py | tee ./logs/output_Original_MLP_Mixer_test.log
+
+# STFT MSPM Test
+uv run MSPM_test_main_with_test.py | tee ./logs/output_MSPM_test.log
+
+# IAA Test
+uv run Original_MLP_Mixer_test.py data=IAA | tee ./logs/output_Original_MLP_Mixer_IAA_test.log
+uv run MSPM_test_main_with_test.py data=IAA | tee ./logs/output_MSPM_IAA_test.log
+
+# IAA Test
+# uv run MSPM_test_main_ori.py data.data_dir='/home/eslab/Vscode/test_model/data/IAA' experiment_name="MSPM_IAA_test" | tee ./logs/output_MSPM_IAA_test.log
+
+# STFT + Flipped STFT
+# uv run MSPM_test_main_ori.py data.data_dir='/home/eslab/Vscode/test_model/data/STFT_and_Flip' experiment_name="MSPM_STFT_and_flipped_test" | tee ./logs/output_MSPM_STFT_and_Flip_test.log
+
+# STFT + Flipped STFT + Shifted STFT
+# uv run MSPM_test_main_ori.py data.data_dir='/home/eslab/Vscode/test_model/data/STFT_Flip_Shift' experiment_name="MSPM_STFT_and_flipped_test" | tee ./logs/output_MSPM_STFT_Flip_Shift_test.log
+
+# IAA + Flipped IAA + Shifted IAA
+# uv run MSPM_test_main_ori.py data.data_dir='/home/eslab/Vscode/test_model/data/Merged_IAA' experiment_name="MSPM_IAA_and_flipped_test" | tee ./logs/output_MSPM_IAA_Flip_Shift_test.log
+
+# New Dataset test
+# uv run MSPM_test_main_ori.py data.data_dir='/home/eslab/Vscode/test_model/data/Merged_data' experiment_name="MSPM_New_Data_test" | tee ./logs/output_MSPM_New_Data_test.log
+
+# New Dataset with 3 patches
+# uv run MSPM_test_main_ori.py data.data_dir='/home/eslab/Vscode/test_model/data/Merged_data' model.patches='[[224, 1], [224, 2], [224, 4]]' experiment_name="MSPM_New_Data_3_Patches" | tee ./logs/output_MSPM_New_Data_3_Patches.log
+
+# New Dataset original patch
+# uv run MSPM_test_main_ori.py data.data_dir='/home/eslab/Vscode/test_model/data/Merged_data' model.patches='[[16, 16]]' experiment_name="MSPM_New_Data_Original_Patch" | tee ./logs/output_MSPM_New_Data_Original_Patch.log
+
+# New Dataset linear patchify test 
+# uv run MSPM_Linear_Patchify.py data.data_dir='/home/eslab/Vscode/test_model/data/Merged_data' experiment_name="MSPM_New_Data_Linear_Patchify_test" | tee ./logs/output_MSPM_New_Data_Linear_Patchify_test.log
+
 # patches = [224, 1], [224, 2], [224, 4] 3 patches
 # uv run MSPM_test_main_ori.py model.patches='[[224, 1], [224, 2], [224, 4]]' experiment_name="MSPM_3_Patches" | tee ./logs/output_MSPM_3_Patches.log
 
@@ -11,7 +45,7 @@
 
 # reference code test
 # HireMLP
-uv run test_reference_codes.py | tee ./logs/output_test_reference_codes_HireMLP.log
+# uv run test_reference_codes.py | tee ./logs/output_test_reference_codes_HireMLP.log
 
 # WaveMLP
-uv run test_reference_codes.py model_name="WaveMLP" | tee ./logs/output_test_reference_codes_WaveMLP.log
+# uv run test_reference_codes.py model_name="WaveMLP" | tee ./logs/output_test_reference_codes_WaveMLP.log

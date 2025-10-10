@@ -102,7 +102,7 @@ class MultiscaleMixer(nn.Module):
         self.num_patches = []
 
         for x in self.patches:
-            self.num_patches.append(224//x[1])
+            self.num_patches.append(224//x[1] * 224//x[0])
         
         self.patch_embedding = nn.ModuleList([
             nn.Conv2d(in_channels=self.in_channels,

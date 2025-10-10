@@ -3,11 +3,6 @@ train:
   transforms:
     - _target_: torchvision.transforms.Resize
       size: [224, 224]
-    - _target_: torchvision.transforms.RandomApply
-      transforms:
-        - _target_: torchvision.transforms.GaussianBlur
-          kernel_size: 3
-          sigma: 0.5
     - _target_: torchvision.transforms.ToTensor
     - _target_: torchvision.transforms.Normalize
       mean: [0.485, 0.456, 0.406]

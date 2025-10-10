@@ -1,0 +1,11 @@
+defaults:
+  - transform
+  - _self_
+
+dataset_name: "UoG STFT"
+train_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/STFT/train"
+val_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/STFT/val"
+test_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/STFT/test"
+input_size: 224
+random_state: 42
+num_classes: 6

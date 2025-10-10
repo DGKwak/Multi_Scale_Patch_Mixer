@@ -2,8 +2,7 @@ defaults:
   - model: default
   - loss: loss
   - data:
-      - UoG
-      - transform
+      - STFT
   - _self_
 
 experiment_name: "Multi-Patch_MLP-Mixer"
@@ -13,5 +12,6 @@ learning_rate: 1e-3
 batch_size: 32
 num_workers: 8
 weight_decay: 1e-4
-csv_path: "/home/eslab/Vscode/test_model/results"
-best_model_path: "/home/eslab/Vscode/test_model/checkpoints"
+csv_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/results"
+confusion_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/confusion"
+best_model_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/checkpoints"

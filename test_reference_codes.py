@@ -82,8 +82,6 @@ def main(cfg):
         'epochs': cfg.epochs,
         'batch_size': cfg.batch_size,
         'learning_rate': cfg.learning_rate,
-        'Patch Size': cfg.model.patches,
-        'Dropout': cfg.model.dropout,
     }
     
     if torch.cuda.is_available():

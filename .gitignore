@@ -4,4 +4,7 @@
 /logs
 /outputs
 /__pycache__
+/checkpoints
 /loss/__pycache__
+/Reference_code/__pycache__
+/data
