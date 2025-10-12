@@ -13,5 +13,5 @@ batch_size: 32
 num_workers: 8
 weight_decay: 1e-4
 csv_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/results"
-confusion_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/confusion"
+confusion_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/results/confusion"
 best_model_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/checkpoints"
