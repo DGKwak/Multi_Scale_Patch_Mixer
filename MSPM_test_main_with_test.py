@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
 
-from Multi_Scale_Patch_Mixer_ori import MultiscaleMixer
+from model.Multi_Scale_Patch_Mixer_ori import MultiscaleMixer
 from loss.loss_func import Info_NCELoss_test
 
 def make_datasets(tr_transform,

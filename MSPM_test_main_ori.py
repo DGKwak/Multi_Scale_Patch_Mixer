@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, Subset
 from torch.optim.lr_scheduler import CosineAnnealingLR, ExponentialLR
 from sklearn.model_selection import train_test_split
 
-from Multi_Scale_Patch_Mixer_ori import MultiscaleMixer
+from model.Multi_Scale_Patch_Mixer_ori import MultiscaleMixer
 from loss.loss_func import Info_NCELoss_test
 
 def train(model, 
