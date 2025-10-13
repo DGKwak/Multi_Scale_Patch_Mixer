@@ -183,8 +183,8 @@ class MultiscaleMixer(nn.Module):
                 intra = self.intra_mixer[idx][ln](intra)
                 print(f"Layer {ln}: inter.shape={inter.shape}, intra.shape={intra.shape}")
                 # Integration Mixer
-                inter = self.integration_mixer[idx][ln](inter)
-                intra = self.integration_mixer[idx][ln](intra)
+                inter = self.integration_mixer[idx][ln*2](inter)
+                intra = self.integration_mixer[idx][ln*2+1](intra)
                 inter_outputs.append(inter)
                 intra_outputs.append(intra)
                 print(f"Layer {ln}: inter.shape={inter.shape}, intra.shape={intra.shape}")
