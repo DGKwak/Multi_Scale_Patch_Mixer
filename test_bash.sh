@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # patch_dim : 768
-uv run MSPM_test_main_with_test.py experiment_name="MSPM_patch_dim_768_test" | tee ./logs/output_MSPM_patch_dim_768_test.log
+# uv run MSPM_test_main_with_test.py experiment_name="MSPM_patch_dim_768_test" | tee ./logs/output_MSPM_patch_dim_768_test.log
+
+# patch_dim : 768 with pyramid structure
+uv run MSPM_test_main_with_test.py experiment_name="MSPM_patch_dim_768_with_pyramid_test" | tee ./logs/output_MSPM_patch_dim_768_with_pyramid_test.log
 
 # MSPM with 8 layers
 # uv run MSPM_test_main_with_test.py model.num_layers=8 experiment_name="MSPM_8_layers_test" | tee ./logs/output_MSPM_8_layers_test.log

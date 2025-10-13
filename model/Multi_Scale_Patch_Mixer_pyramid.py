@@ -140,11 +140,13 @@ class MultiscaleMixer(nn.Module):
                 for y in self.dim
             ]))
             
-            self.integration_mixer.append(nn.ModuleList([
-                MlpBlock(2, x, x*2, x, self.act, self.dropout),
-                MlpBlock(1, y, y, z, self.act, self.dropout, residual=False)
-                for y, z  in zip(self.dim, self.bottle_dim)
-            ]))
+            tmp_module_list = nn.ModuleList()
+
+            for y, z  in zip(self.dim, self.bottle_dim):
+                tmp_module_list.append(MlpBlock(2, x, x*2, x, self.act, self.dropout))
+                tmp_module_list.append(MlpBlock(1, y, y, z, self.act, self.dropout, residual=False))
+            
+            self.integration_mixer.append(tmp_module_list)
         
         self.reweight = Reweight(self.num_layers)
         
@@ -170,20 +172,22 @@ class MultiscaleMixer(nn.Module):
             
             inter_outputs, intra_outputs = [], []
             inter, intra = z, z
-            for ln in range(self.num_layers):                
+            for ln in range(self.num_layers):
+                print(f"Layer {ln}: inter.shape={inter.shape}, intra.shape={intra.shape}")
                 # Channel Mixer
                 inter = self.channel_mixer[idx][ln](inter)
                 intra = self.channel_mixer[idx][ln](intra)
-                
+                print(f"Layer {ln}: inter.shape={inter.shape}, intra.shape={intra.shape}")
                 # Inter & Intra Mixer
                 inter = self.inter_mixer[idx][ln](inter)
                 intra = self.intra_mixer[idx][ln](intra)
-
+                print(f"Layer {ln}: inter.shape={inter.shape}, intra.shape={intra.shape}")
                 # Integration Mixer
                 inter = self.integration_mixer[idx][ln](inter)
                 intra = self.integration_mixer[idx][ln](intra)
                 inter_outputs.append(inter)
                 intra_outputs.append(intra)
+                print(f"Layer {ln}: inter.shape={inter.shape}, intra.shape={intra.shape}")
 
             # Reweighting
             inter_z = self.reweight(inter_outputs)
