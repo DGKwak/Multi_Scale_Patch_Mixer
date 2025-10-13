@@ -1,0 +1,17 @@
+defaults:
+  - model: STMixer
+  - loss: loss
+  - data:
+      - STFT
+  - _self_
+
+experiment_name: "ST-Mixer"
+num_classes: 6
+epochs: 200
+learning_rate: 1e-3
+batch_size: 32
+num_workers: 8
+weight_decay: 1e-4
+csv_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/results"
+confusion_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/results/confusion"
+best_model_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/checkpoints"
