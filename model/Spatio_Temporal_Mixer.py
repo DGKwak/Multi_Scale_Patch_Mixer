@@ -84,7 +84,7 @@ class MixerBlock(nn.Module):
             
             return x
 
-class Spatio_Temporal_Mixer(nn.Module):
+class SpatioTemporalMixer(nn.Module):
     def __init__(self,
                  in_channels: int,
                  patch_dim: int,
