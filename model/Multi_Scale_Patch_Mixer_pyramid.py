@@ -132,7 +132,7 @@ class MultiscaleMixer(nn.Module):
             
             self.inter_mixer.append(nn.ModuleList([
                 MlpBlock(2, x, x*2, x, self.act, self.dropout, residual=False)
-                for _ in self.num_patches
+                for _ in self.dim
             ]))
             
             self.intra_mixer.append(nn.ModuleList([
@@ -148,14 +148,14 @@ class MultiscaleMixer(nn.Module):
             
             self.integration_mixer.append(tmp_module_list)
         
-        self.reweight = Reweight(self.num_layers)
+        # self.reweight = Reweight(self.num_layers)
         
         self.a = nn.Parameter(torch.ones(len(self.patches))*0.5, requires_grad=True)
         
         self.head = nn.Sequential(
-            nn.LayerNorm(patch_dim),
-            nn.Linear(patch_dim, patch_dim//2),
-            nn.Linear(patch_dim//2, 6)
+            nn.LayerNorm(self.bottle_dim[-1]),
+            nn.Linear(self.bottle_dim[-1], self.bottle_dim[-1]),
+            nn.Linear(self.bottle_dim[-1], 6)
         )
         
     def forward(self, x):
@@ -170,30 +170,23 @@ class MultiscaleMixer(nn.Module):
             # Positional Embedding
             z = self.positional_embedding[idx](z)
             
-            inter_outputs, intra_outputs = [], []
             inter, intra = z, z
             for ln in range(self.num_layers):
-                print(f"Layer {ln}: inter.shape={inter.shape}, intra.shape={intra.shape}")
                 # Channel Mixer
                 inter = self.channel_mixer[idx][ln](inter)
                 intra = self.channel_mixer[idx][ln](intra)
-                print(f"Layer {ln}: inter.shape={inter.shape}, intra.shape={intra.shape}")
+
                 # Inter & Intra Mixer
                 inter = self.inter_mixer[idx][ln](inter)
                 intra = self.intra_mixer[idx][ln](intra)
-                print(f"Layer {ln}: inter.shape={inter.shape}, intra.shape={intra.shape}")
+
                 # Integration Mixer
                 inter = self.integration_mixer[idx][ln*2](inter)
+                inter = self.integration_mixer[idx][ln*2+1](inter)
+                intra = self.integration_mixer[idx][ln*2](intra)
                 intra = self.integration_mixer[idx][ln*2+1](intra)
-                inter_outputs.append(inter)
-                intra_outputs.append(intra)
-                print(f"Layer {ln}: inter.shape={inter.shape}, intra.shape={intra.shape}")
-
-            # Reweighting
-            inter_z = self.reweight(inter_outputs)
-            intra_z = self.reweight(intra_outputs)
             
-            Mixer_output.append((inter_z, intra_z))
+            Mixer_output.append((inter, intra))
         
         patch_output = []
         for i in range(len(self.patches)):
