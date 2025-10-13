@@ -24,16 +24,16 @@ def make_datasets(train_dir,
                   test_dir,
                   input_size):
     # 데이터셋 로드
-    input_size = (input_size, input_size)
-    train_dataset = MD_dataset(train_dir, is_train=True, input_size=input_size)
-    val_dataset = MD_dataset(val_dir, is_train=False, input_size=input_size)
-    test_dataset = MD_dataset(test_dir, is_train=False, input_size=input_size)
+    input_tuple = (input_size, input_size)
+    train_dataset = MD_dataset(train_dir, is_train=True, image_size=input_tuple)
+    val_dataset = MD_dataset(val_dir, is_train=False, image_size=input_tuple)
+    test_dataset = MD_dataset(test_dir, is_train=False, image_size=input_tuple)
 
     # 데이터셋 정보 출력
     print(f"총 데이터셋 크기: {len(train_dataset)}")
     print(f"검증 데이터셋 크기: {len(val_dataset)}")
-    print(f"클래스 수: {len(train_dataset.classes)}")
-    print(f"클래스 목록: {train_dataset.classes}")
+    print(f"클래스 수: {len(train_dataset.get_class_names())}")
+    print(f"클래스 목록: {train_dataset.get_class_names()}")
 
     return train_dataset, val_dataset, test_dataset
 
@@ -337,7 +337,7 @@ def main(cfg):
         
         # Confusion Matrix 생성 및 저장
         plot_save_path = cfg.confusion_path
-        cm_path = plot_confusion_matrix(targets, predictions, train_dataset.classes, 
+        cm_path = plot_confusion_matrix(targets, predictions, train_dataset.get_class_names(), 
                                       cfg.experiment_name, plot_save_path)
         
         # 테스트 결과를 메타데이터에 추가하여 저장
@@ -357,7 +357,7 @@ def main(cfg):
             f.write("\n")
             # 클래스별 정확도도 저장
             f.write("# Classification Report\n")
-            f.write(classification_report(targets, predictions, target_names=train_dataset.classes))
+            f.write(classification_report(targets, predictions, target_names=train_dataset.get_class_names()))
         
         print(f"Test results saved to {test_results_path}")
         

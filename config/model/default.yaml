@@ -1,5 +1,5 @@
 in_channels: 3
-patch_dim: 128
+patch_dim: 768
 num_layers: 4
 dropout: 0.1
 activation: "relu"

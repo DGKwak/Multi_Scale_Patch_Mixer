@@ -6,7 +6,7 @@ from torchvision import datasets
 from torch.utils.data import Dataset
 from skimage import io
 
-from data_augmentation import apply_dwt_augmentation, extract_sobel_features
+from utils.augmentation import apply_dwt_augmentation, extract_sobel_features
 
 class MD_dataset(Dataset):
     def __init__(self, 

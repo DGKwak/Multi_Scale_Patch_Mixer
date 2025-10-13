@@ -1,14 +1,27 @@
 #!/bin/bash
 
+# patch_dim : 768
+uv run MSPM_test_main_with_test.py experiment_name="MSPM_patch_dim_768_test" | tee ./logs/output_MSPM_patch_dim_768_test.log
+
+# MSPM with 8 layers
+# uv run MSPM_test_main_with_test.py model.num_layers=8 experiment_name="MSPM_8_layers_test" | tee ./logs/output_MSPM_8_layers_test.log
+
+# MSPM with (16, 16) patch
+# uv run MSPM_test_main_with_test.py model.patches='[[16, 16]]' experiment_name="MSPM_16_16_patch_test" | tee ./logs/output_MSPM_16_16_patch_test.log
+
+# Augmentation test
+# uv run MSPM_test_main_with_customdataset.py experiment_name="Augmentation_test" | tee ./logs/output_Augmentation_test.log
+# uv run MSPM_test_main_with_customdataset.py model.patches='[[224, 1], [224, 2], [224, 4]]' experiment_name="Augmentation_3_Patches_test" | tee ./logs/output_Augmentation_3patches_test.log
+
 # STFT Original MLP-Mixer Test
-uv run Original_MLP_Mixer_test.py | tee ./logs/output_Original_MLP_Mixer_test.log
+# uv run Original_MLP_Mixer_test.py | tee ./logs/output_Original_MLP_Mixer_test.log
 
 # STFT MSPM Test
-uv run MSPM_test_main_with_test.py | tee ./logs/output_MSPM_test.log
+# uv run MSPM_test_main_with_test.py | tee ./logs/output_MSPM_test.log
 
 # IAA Test
-uv run Original_MLP_Mixer_test.py data=IAA | tee ./logs/output_Original_MLP_Mixer_IAA_test.log
-uv run MSPM_test_main_with_test.py data=IAA | tee ./logs/output_MSPM_IAA_test.log
+# uv run Original_MLP_Mixer_test.py data=IAA | tee ./logs/output_Original_MLP_Mixer_IAA_test.log
+# uv run MSPM_test_main_with_test.py data=IAA | tee ./logs/output_MSPM_IAA_test.log
 
 # IAA Test
 # uv run MSPM_test_main_ori.py data.data_dir='/home/eslab/Vscode/test_model/data/IAA' experiment_name="MSPM_IAA_test" | tee ./logs/output_MSPM_IAA_test.log
