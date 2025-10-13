@@ -100,6 +100,8 @@ class MultiscaleMixer(nn.Module):
         self.patches = patches
         self.act = act
         self.num_patches = []
+        self.dim = [768, 384, 192, 128]
+        self.bottle_dim = [384, 192, 128, 128]
 
         for x in self.patches:
             self.num_patches.append(224//x[1] * 224//x[0])
@@ -122,27 +124,27 @@ class MultiscaleMixer(nn.Module):
         self.intra_mixer = nn.ModuleList()
         self.integration_mixer = nn.ModuleList()
 
-        for _ in range(len(self.patches)):
-            tmp = nn.ModuleList([
-                MlpBlock(1, patch_dim, x*2, x, self.act, self.dropout)
-                for x in [1024, 512, 256, 128]
-            ])
-
-            self.channel_mixer.append(tmp)
-            self.intra_mixer.append(tmp)
-
-        self.channel_mixer = nn.ModuleList([
-            MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
-            for _ in range(len(self.patches))])
-        self.inter_mixer = nn.ModuleList([
-            MlpBlock(2, x, x*2, x, self.act, self.dropout, residual=False)
-            for x in self.num_patches])
-        self.intra_mixer = nn.ModuleList([
-            MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout, residual=False)
-            for _ in range(len(self.patches))])
-        self.mixrep_mixer = nn.ModuleList([
-            MlpBlock(2, x, x*2, x, self.act, self.dropout)
-            for x in self.num_patches])
+        for x in self.num_patches:
+            self.channel_mixer.append(nn.ModuleList([
+                MlpBlock(1, y, y*2, y, self.act, self.dropout)
+                for y in self.dim
+            ]))
+            
+            self.inter_mixer.append(nn.ModuleList([
+                MlpBlock(2, x, x*2, x, self.act, self.dropout, residual=False)
+                for _ in self.num_patches
+            ]))
+            
+            self.intra_mixer.append(nn.ModuleList([
+                MlpBlock(1, y, y*2, y, self.act, self.dropout, residual=False)
+                for y in self.dim
+            ]))
+            
+            self.integration_mixer.append(nn.ModuleList([
+                MlpBlock(2, x, x*2, x, self.act, self.dropout),
+                MlpBlock(1, y, y, z, self.act, self.dropout, residual=False)
+                for y, z  in zip(self.dim, self.bottle_dim)
+            ]))
         
         self.reweight = Reweight(self.num_layers)
         
@@ -168,17 +170,18 @@ class MultiscaleMixer(nn.Module):
             
             inter_outputs, intra_outputs = [], []
             inter, intra = z, z
-            for _ in range(self.num_layers):                
-                # Inter & Intra Mixer
-                inter = self.channel_mixer[idx](inter)
-                intra = self.channel_mixer[idx](intra)
-                
-                inter = self.inter_mixer[idx](inter)
-                intra = self.intra_mixer[idx](intra)
-
+            for ln in range(self.num_layers):                
                 # Channel Mixer
-                inter = self.mixrep_mixer[idx](inter)
-                intra = self.mixrep_mixer[idx](intra)
+                inter = self.channel_mixer[idx][ln](inter)
+                intra = self.channel_mixer[idx][ln](intra)
+                
+                # Inter & Intra Mixer
+                inter = self.inter_mixer[idx][ln](inter)
+                intra = self.intra_mixer[idx][ln](intra)
+
+                # Integration Mixer
+                inter = self.integration_mixer[idx][ln](inter)
+                intra = self.integration_mixer[idx][ln](intra)
                 inter_outputs.append(inter)
                 intra_outputs.append(intra)
 
