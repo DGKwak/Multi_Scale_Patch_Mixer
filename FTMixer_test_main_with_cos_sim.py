@@ -16,8 +16,8 @@ import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
 
 # from model.Multi_Scale_Patch_Mixer_ori import MultiscaleMixer
-from model.Spatio_Temporal_Mixer import SpatioTemporalMixer
-from loss.loss_func import Info_NCELoss_test
+from model.Frequency_Temporal_Mixer import FrequencyTemporalMixer
+from loss.loss_func import CosineSimilarityLoss
 
 def make_datasets(tr_transform,
                   v_transform,
@@ -74,6 +74,7 @@ def train(model,
           loader, 
           optimizer, 
           cross_entropy, 
+          cosine_similarity,
           lambda_aux,
           device, 
           scheduler):
@@ -92,10 +93,9 @@ def train(model,
         logit, [s_x, t_x] = model(x)
 
         ce_loss = cross_entropy(logit, y)
-        s_x_loss = cross_entropy(s_x, y)
-        t_x_loss = cross_entropy(t_x, y)
-        
-        loss = ce_loss + lambda_aux * (s_x_loss + t_x_loss)
+        cos_sim = cosine_similarity(s_x, t_x)
+
+        loss = ce_loss + lambda_aux * cos_sim
         loss.backward()
         optimizer.step()
         scheduler.step()
@@ -108,6 +108,7 @@ def train(model,
 def evaluate(model, 
              loader, 
              cross_entropy,
+             cosine_similarity,
              lambda_aux, 
              device):
     model.eval()
@@ -123,12 +124,13 @@ def evaluate(model,
             x, y = x.to(device), y.to(device)
 
             logit, [s_x, t_x] = model(x)
+            
+            correct += (logit.argmax(1) == y).sum().item()
 
             ce_loss = cross_entropy(logit, y)
-            s_x_loss = cross_entropy(s_x, y)
-            t_x_loss = cross_entropy(t_x, y)
-        
-            loss = ce_loss + lambda_aux * (s_x_loss + t_x_loss)
+            cos_sim = cosine_similarity(s_x, t_x)
+
+            loss = ce_loss + lambda_aux * cos_sim
 
             total_loss += loss.item() * x.size(0)
 
@@ -189,7 +191,7 @@ def plot_confusion_matrix(y_true, y_pred, class_names, experiment_name, save_pat
     print(f"Confusion matrix saved to {cm_path}")
     return cm_path
 
-@hydra.main(config_path='./config', config_name='STMixer_config')
+@hydra.main(config_path='./config', config_name='FTMixer_config')
 def main(cfg):
     metadata = {
         'Experiment Name': cfg.experiment_name,
@@ -225,7 +227,7 @@ def main(cfg):
                                                             cfg.data.random_state)
     
     # Model
-    model = SpatioTemporalMixer(
+    model = FrequencyTemporalMixer(
         in_channels=cfg.model.in_channels,
         patch_dim=cfg.model.patch_dim,
         num_layers=cfg.model.num_layers,
@@ -236,6 +238,7 @@ def main(cfg):
 
     # loss Function
     cross_entropy = nn.CrossEntropyLoss()
+    cosine_similarity = CosineSimilarityLoss()
 
     # Optimizer & Scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
@@ -258,6 +261,7 @@ def main(cfg):
                                       train_loader,
                                       optimizer,
                                       cross_entropy,
+                                      cosine_similarity,
                                       cfg.loss.lambda_aux,
                                       device,
                                       scheduler)
@@ -265,6 +269,7 @@ def main(cfg):
         val_loss, val_acc = evaluate(model,
                                      val_loader,
                                      cross_entropy,
+                                     cosine_similarity,
                                      cfg.loss.lambda_aux,
                                      device)
         

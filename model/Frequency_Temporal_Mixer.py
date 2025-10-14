@@ -51,8 +51,7 @@ class MlpBlock(nn.Module):
         res = x
         x = self.mlp(x)
         
-        if self.residual:
-            x = x + res
+        x = x + res
         
         return x
 
@@ -76,15 +75,18 @@ class MixerBlock(nn.Module):
                                       activation=activation,
                                       dropout=dropout)
         
-        def forward(self, x):
-            B, D, N = x.shape
-            
-            x = x + self.token_mixer(x)
-            x = x + self.channel_mixer(x)
-            
-            return x
+    def forward(self, x):
+        B, D, N = x.shape
+        
+        x = x + self.token_mixer(x)
 
-class SpatioTemporalMixer(nn.Module):
+        x = einops.rearrange(x, 'b d n -> b n d')
+        x = x + self.channel_mixer(x)
+        x = einops.rearrange(x, 'b n d -> b d n')
+        
+        return x
+
+class FrequencyTemporalMixer(nn.Module):
     def __init__(self,
                  in_channels: int,
                  patch_dim: int,
@@ -103,6 +105,15 @@ class SpatioTemporalMixer(nn.Module):
         
         self.patch_len = [(224//x[0])*(224//x[1]) for x in self.patch_size]
         
+        self.channel_fusion = nn.Sequential(
+            nn.Conv2d(in_channels=self.in_channels,
+                      out_channels=self.in_channels,
+                      kernel_size=3,
+                      stride=1,
+                      padding=1),
+            nn.BatchNorm2d(self.in_channels),
+        )
+
         self.patch_embed = nn.ModuleList([
             nn.Conv2d(in_channels=self.in_channels, 
                       out_channels=self.patch_dim, 
@@ -141,6 +152,8 @@ class SpatioTemporalMixer(nn.Module):
     def forward(self, x):
         B, C, H, W = x.shape
         
+        x = self.channel_fusion(x)
+
         # Spatio_mixer
         s_x = self.patch_embed[0](x)
         s_x = einops.rearrange(s_x, 'b c h w -> b c (h w)')
@@ -158,10 +171,14 @@ class SpatioTemporalMixer(nn.Module):
             t_x = self.temporal_mixer[idx](t_x)
         
         # B, D, N1+N2
-        z = torch.cat([s_x, t_x], dim=2)
-        
+        # z = torch.cat([s_x, t_x], dim=2)
+        z = (s_x + t_x)
+
         # GAP
         z = torch.mean(z, dim=2, keepdim=False)
+        
+        s_x = torch.mean(s_x, dim=2, keepdim=False)
+        t_x = torch.mean(t_x, dim=2, keepdim=False)
         
         logits = self.head(z)
         

@@ -4,7 +4,25 @@
 # uv run MSPM_test_main_with_test.py experiment_name="MSPM_patch_dim_768_test" | tee ./logs/output_MSPM_patch_dim_768_test.log
 
 # patch_dim : 768 with pyramid structure
-uv run MSPM_test_main_with_test.py experiment_name="MSPM_patch_dim_768_with_pyramid_test" | tee ./logs/output_MSPM_patch_dim_768_with_pyramid_test.log
+# uv run MSPM_test_main_with_test.py experiment_name="MSPM_patch_dim_768_with_pyramid_test" | tee ./logs/output_MSPM_patch_dim_768_with_pyramid_test.log
+
+# FTMixer with cosine similarity loss
+# uv run FTMixer_test_main_with_cos_sim.py experiment_name="FTMixer_with_cosine_similarity_loss_test" | tee ./logs/output_FTMixer_with_cosine_similarity_loss_test.log
+
+# FTMixer with cosine similarity loss - layer 8
+# uv run FTMixer_test_main_with_cos_sim.py model.num_layers=8 experiment_name="FTMixer_with_cosine_similarity_loss_8_layers_test" | tee ./logs/output_FTMixer_with_cosine_similarity_loss_8_layers_test.log
+
+# FTMixer with cosine similarity loss - IAA
+# uv run FTMixer_test_main_with_cos_sim.py data=IAA experiment_name="FTMixer_with_cosine_similarity_loss_IAA_test" | tee ./logs/output_FTMixer_with_cosine_similarity_loss_IAA_test.log
+
+# MSPM with SE - IAA
+# uv run MSPM_test_main_with_SE.py data=IAA experiment_name="MSPM_with_SE_IAA_test" | tee ./logs/output_MSPM_with_SE_IAA_test.log
+
+# MSPM with SE - IAA and 8 layers
+uv run MSPM_test_main_with_SE.py data=IAA model.num_layers=8 experiment_name="MSPM_with_SE_IAA_test_8_layers" | tee ./logs/output_MSPM_with_SE_IAA_test_8_layers.log
+
+# MSPM with SE CT - IAA
+uv run MSPM_test_main_with_SE_CT.py data=IAA experiment_name="MSPM_with_SE_CT_IAA_test" | tee ./logs/output_MSPM_with_SE_CT_IAA_test.log
 
 # MSPM with 8 layers
 # uv run MSPM_test_main_with_test.py model.num_layers=8 experiment_name="MSPM_8_layers_test" | tee ./logs/output_MSPM_8_layers_test.log

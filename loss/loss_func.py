@@ -56,3 +56,15 @@ class Info_NCELoss_test(nn.Module):
         loss = F.cross_entropy(similarity_matrix, labels)
         
         return loss
+
+class CosineSimilarityLoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.cosine_similarity = nn.CosineSimilarity(dim=1)
+    
+    def forward(self, s_x, t_x):
+        cos_sim = self.cosine_similarity(s_x, t_x)
+        loss = 1 - torch.mean(cos_sim)
+
+        return loss
