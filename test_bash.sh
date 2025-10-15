@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# MSPM with Shift block - IAA layers 8
+uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=8 experiment_name="MSPM_with_Shift_IAA_test_8_layers" | tee ./logs/output_MSPM_with_Shift_IAA_test_8_layers.log
+
 # patch_dim : 768
 # uv run MSPM_test_main_with_test.py experiment_name="MSPM_patch_dim_768_test" | tee ./logs/output_MSPM_patch_dim_768_test.log
 
@@ -19,10 +22,10 @@
 # uv run MSPM_test_main_with_SE.py data=IAA experiment_name="MSPM_with_SE_IAA_test" | tee ./logs/output_MSPM_with_SE_IAA_test.log
 
 # MSPM with SE - IAA and 8 layers
-uv run MSPM_test_main_with_SE.py data=IAA model.num_layers=8 experiment_name="MSPM_with_SE_IAA_test_8_layers" | tee ./logs/output_MSPM_with_SE_IAA_test_8_layers.log
+# uv run MSPM_test_main_with_SE.py data=IAA model.num_layers=8 experiment_name="MSPM_with_SE_IAA_test_8_layers" | tee ./logs/output_MSPM_with_SE_IAA_test_8_layers.log
 
 # MSPM with SE CT - IAA
-uv run MSPM_test_main_with_SE_CT.py data=IAA experiment_name="MSPM_with_SE_CT_IAA_test" | tee ./logs/output_MSPM_with_SE_CT_IAA_test.log
+# uv run MSPM_test_main_with_SE_CT.py data=IAA experiment_name="MSPM_with_SE_CT_IAA_test" | tee ./logs/output_MSPM_with_SE_CT_IAA_test.log
 
 # MSPM with 8 layers
 # uv run MSPM_test_main_with_test.py model.num_layers=8 experiment_name="MSPM_8_layers_test" | tee ./logs/output_MSPM_8_layers_test.log
