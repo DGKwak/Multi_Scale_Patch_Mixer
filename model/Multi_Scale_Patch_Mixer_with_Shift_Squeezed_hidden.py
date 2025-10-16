@@ -136,7 +136,7 @@ class ShiftBlock(nn.Module):
         self.dropout = dropout
         self.act = act
 
-        self.channel_mixer_S = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
+        self.channel_mixer_S = MlpBlock(1, patch_dim, int(patch_dim*1.5), patch_dim, self.act, self.dropout)
 
         # self.channel_mixer_l = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
         # self.channel_mixer_r = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
@@ -151,7 +151,7 @@ class ShiftBlock(nn.Module):
             nn.LayerNorm(patch_dim),
         )
 
-        self.channel_mixer_F = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
+        self.channel_mixer_F = MlpBlock(1, patch_dim, int(patch_dim*1.5), patch_dim, self.act, self.dropout)
 
         self.alpha = nn.Parameter(torch.ones(1), requires_grad=True)
 
@@ -223,7 +223,7 @@ class MultiscaleMixer(nn.Module):
         
         self.token_mixer = nn.ModuleList([
             nn.ModuleList([
-                MlpBlock(2, x, x*2, x, self.act, self.dropout)
+                MlpBlock(2, x, int(x*1.5), x, self.act, self.dropout)
                 for _ in range(self.num_layers)
             ])
             for x in self.num_patches

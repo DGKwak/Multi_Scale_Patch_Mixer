@@ -3,6 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 import einops
 
+# Change log
+
+# - MLP block
+# Before : LayerNorm -> Linear -> Activation -> LayerNorm -> Linear -> Dropout
+# After : LayerNorm -> Linear -> Activation -> Dropout -> Linear
+
+# - ChannelMixer_F
+# MLPblock -> Conv1d
+
 def get_activation(activation):
     if activation == "relu":
         return nn.ReLU()
@@ -10,8 +19,6 @@ def get_activation(activation):
         return nn.GELU()
     elif activation == "leaky":
         return nn.LeakyReLU()
-    elif activation == "silu":
-        return nn.SiLU()
     else:
         raise ValueError(f"Unsupported activation: {activation}")
 
@@ -102,9 +109,8 @@ class MlpBlock(nn.Module):
             nn.LayerNorm(in_features),
             nn.Linear(in_features, hidden_features),
             get_activation(activation),
-            nn.LayerNorm(hidden_features),
-            nn.Linear(hidden_features, out_features),
-            nn.Dropout(dropout)
+            nn.Dropout(dropout),
+            nn.Linear(hidden_features, out_features)
         )
     
     def forward(self, x):
@@ -138,8 +144,6 @@ class ShiftBlock(nn.Module):
 
         self.channel_mixer_S = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
 
-        # self.channel_mixer_l = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
-        # self.channel_mixer_r = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
         self.channel_mixer_l = nn.Sequential(
             nn.Linear(patch_dim, patch_dim),
             get_activation(self.act),
@@ -151,7 +155,7 @@ class ShiftBlock(nn.Module):
             nn.LayerNorm(patch_dim),
         )
 
-        self.channel_mixer_F = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
+        self.channel_mixer_F = nn.Conv1d(patch_dim, patch_dim, kernel_size=1, stride=1)
 
         self.alpha = nn.Parameter(torch.ones(1), requires_grad=True)
 
@@ -231,7 +235,12 @@ class MultiscaleMixer(nn.Module):
 
         self.shift_block = nn.ModuleList([
             nn.ModuleList([
-                ShiftBlock(patch_dim, shift_l=[-1,0,1], shift_r=[1,0,-1], shift_size=3)
+                ShiftBlock(patch_dim, 
+                           shift_l=[-1,0,1], 
+                           shift_r=[1,0,-1], 
+                           shift_size=3, 
+                           dropout=self.dropout, 
+                           act=self.act)
                 for _ in range(self.num_layers)
             ])
             for _ in range(len(self.patches))

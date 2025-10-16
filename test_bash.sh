@@ -1,7 +1,49 @@
 #!/bin/bash
 
 # MSPM with Shift block - IAA layers 8
-uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=8 experiment_name="MSPM_with_Shift_IAA_test_8_layers" | tee ./logs/output_MSPM_with_Shift_IAA_test_8_layers.log
+# uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=8 experiment_name="MSPM_with_Shift_IAA_test_8_layers" | tee ./logs/output_MSPM_with_Shift_IAA_test_8_layers.log
+
+# MSPM with Shift block - IAA layers 8 single patch (224,2)
+# uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=8 model.patches='[[224, 2]]' experiment_name="MSPM_with_Shift_IAA_test_8_layers_single_patch" | tee ./logs/output_MSPM_with_Shift_IAA_test_8_layers_single_patch.log
+
+# MSPM with Shift block - IAA layers 8 patch_dim 128
+# uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=8 model.patch_dim=128 experiment_name="MSPM_with_Shift_IAA_test_8_layers_patch_dim_128" | tee ./logs/output_MSPM_with_Shift_IAA_test_8_layers_patch_dim_128.log
+
+# MSPM with Shift block - IAA layers 8 patch_dim 128 single patch (224,2)
+# uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=8 model.patch_dim=128 model.patches='[[224, 2]]' experiment_name="MSPM_with_Shift_IAA_test_8_layers_patch_dim_128_single_patch" | tee ./logs/output_MSPM_with_Shift_IAA_test_8_layers_patch_dim_128_single_patch.log
+
+# MSPM with Shift block - IAA layers 8 patch_dim 128 single patch (224,2) with silu activation
+# uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=8 model.patch_dim=128 model.patches='[[224, 2]]' model.activation='silu' experiment_name="MSPM_with_Shift_IAA_test_8_layers_patch_dim_128_single_patch_silu" | tee ./logs/output_MSPM_with_Shift_IAA_test_8_layers_patch_dim_128_single_patch_silu.log
+
+# MSPM with Shift block - IAA layers 7 patch_dim 128 single patch (224,2) with silu activation
+# uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=7 model.patch_dim=128 model.patches='[[224, 2]]' model.activation='silu' experiment_name="MSPM_with_Shift_IAA_test_7_layers_patch_dim_128_single_patch_silu" | tee ./logs/output_MSPM_with_Shift_IAA_test_7_layers_patch_dim_128_single_patch_silu.log
+
+# MSPM with Shift block - IAA layers 6 patch_dim 128 single patch (224,2) with silu activation
+uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=6 model.patch_dim=128 model.patches='[[224, 2]]' model.activation='silu' experiment_name="MSPM_with_Shift_IAA_test_6_layers_patch_dim_128_single_patch_silu" | tee ./logs/output_MSPM_with_Shift_IAA_test_6_layers_patch_dim_128_single_patch_silu.log
+
+# MSPM with Shift block - IAA layers 5 patch_dim 128 single patch (224,2) with silu activation
+uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=5 model.patch_dim=128 model.patches='[[224, 2]]' model.activation='silu' experiment_name="MSPM_with_Shift_IAA_test_5_layers_patch_dim_128_single_patch_silu" | tee ./logs/output_MSPM_with_Shift_IAA_test_5_layers_patch_dim_128_single_patch_silu.log
+
+# MSPM with Shift block - IAA layers 4 patch_dim 128 single patch (224,2) with silu activation
+uv run MSPM_test_main_with_Shift.py data=IAA model.num_layers=4 model.patch_dim=128 model.patches='[[224, 2]]' model.activation='silu' experiment_name="MSPM_with_Shift_IAA_test_4_layers_patch_dim_128_single_patch_silu" | tee ./logs/output_MSPM_with_Shift_IAA_test_4_layers_patch_dim_128_single_patch_silu.log
+
+# Lightweight MSPM with Shift block - IAA layers 8 patch_dim 128
+# uv run Lightweight_MSPM_test_main_with_Shift.py data=IAA model.num_layers=8 model.patch_dim=128 experiment_name="Lightweight_MSPM_with_Shift_IAA_test_8_layers_patch_dim_128" | tee ./logs/output_Lightweight_MSPM_with_Shift_IAA_test_8_layers_patch_dim_128.log
+
+# Lightweight MSPM with Shift block - IAA layers 8 patch_dim 128 single patch (224,2)
+# uv run Lightweight_MSPM_test_main_with_Shift.py data=IAA model.num_layers=8 model.patch_dim=128 model.patches='[[224, 2]]' experiment_name="Lightweight_MSPM_with_Shift_IAA_test_8_layers_patch_dim_128_single_patch" | tee ./logs/output_Lightweight_MSPM_with_Shift_IAA_test_8_layers_patch_dim_128_single_patch.log
+
+# MSPM with Shift block Squeezed - IAA layers 8 patch_dim 128 silu activation
+# uv run MSPM_test_main_with_Shift_Squeezed.py data=IAA model.num_layers=8 model.activation='silu' model.patch_dim=128 experiment_name="MSPM_with_Shift_Squeezed_IAA_test_8_layers_patch_dim_128" | tee ./logs/output_MSPM_with_Shift_Squeezed_IAA_test_8_layers_patch_dim_128_silu.log
+
+# MSPM with Shift block Squeezed - IAA layers 8 patch_dim 128 single patch (224,2) silu activation
+# uv run MSPM_test_main_with_Shift_Squeezed.py data=IAA model.num_layers=8 model.activation='silu' model.patch_dim=128 model.patches='[[224, 2]]' experiment_name="MSPM_with_Shift_Squeezed_IAA_test_8_layers_patch_dim_128_single_patch" | tee ./logs/output_MSPM_with_Shift_Squeezed_IAA_test_8_layers_patch_dim_128_single_patch_silu.log
+
+# MSPM with Shift block Squeezed - IAA layers 8 patch_dim 128 single patch (224,2) gelu activation
+# uv run MSPM_test_main_with_Shift_Squeezed.py data=IAA model.num_layers=8 model.activation='gelu' model.patch_dim=128 model.patches='[[224, 2]]' experiment_name="MSPM_with_Shift_Squeezed_IAA_test_8_layers_patch_dim_128_single_patch_gelu" | tee ./logs/output_MSPM_with_Shift_Squeezed_IAA_test_8_layers_patch_dim_128_single_patch_gelu.log
+
+# MSPM with Shift block Squeezed - IAA layers 8 patch_dim 128 single patch (224,4) gelu activation
+# uv run MSPM_test_main_with_Shift_Squeezed.py data=IAA model.num_layers=8 model.activation='gelu' model.patch_dim=128 model.patches='[[224, 4]]' experiment_name="MSPM_with_Shift_Squeezed_IAA_test_8_layers_patch_dim_128_single_patch4_gelu" | tee ./logs/output_MSPM_with_Shift_Squeezed_IAA_test_8_layers_patch_dim_128_single_patch4_gelu.log
 
 # patch_dim : 768
 # uv run MSPM_test_main_with_test.py experiment_name="MSPM_patch_dim_768_test" | tee ./logs/output_MSPM_patch_dim_768_test.log

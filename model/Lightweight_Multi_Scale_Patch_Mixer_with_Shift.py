@@ -10,8 +10,6 @@ def get_activation(activation):
         return nn.GELU()
     elif activation == "leaky":
         return nn.LeakyReLU()
-    elif activation == "silu":
-        return nn.SiLU()
     else:
         raise ValueError(f"Unsupported activation: {activation}")
 
@@ -174,6 +172,24 @@ class ShiftBlock(nn.Module):
 
         return z
 
+class DepthwiseSeparableConv(nn.Module):
+    def __init__(self,
+                 in_channels:int,
+                 out_channels:int,
+                 kernel_size,
+                 stride,
+                 padding:int=0):
+        super().__init__()
+        
+        self.depthwise = nn.Conv2d(in_channels, in_channels, kernel_size, stride, padding, groups=in_channels)
+        self.pointwise = nn.Conv2d(in_channels, out_channels, kernel_size=1)
+
+    def forward(self, x):
+        x = self.depthwise(x)
+        x = self.pointwise(x)
+
+        return x
+
 class MultiscaleMixer(nn.Module):
     """
     Multi-Scale Patch Mixer with Shift Block 
@@ -209,10 +225,10 @@ class MultiscaleMixer(nn.Module):
             self.num_patches.append(224//x[1] * 224//x[0])
         
         self.patch_embedding = nn.ModuleList([
-            nn.Conv2d(in_channels=self.in_channels,
-                      out_channels=patch_dim,
-                      kernel_size=x,
-                      stride=x)
+            DepthwiseSeparableConv(self.in_channels,
+                                   patch_dim,
+                                   kernel_size=x,
+                                   stride=x)
             for x in self.patches
         ])
         

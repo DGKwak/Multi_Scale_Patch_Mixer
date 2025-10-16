@@ -16,8 +16,7 @@ import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
 
 # from model.Multi_Scale_Patch_Mixer_ori import MultiscaleMixer
-from model.Multi_Scale_Patch_Mixer_with_Shift import MultiscaleMixer
-from loss.loss_func import Info_NCELoss_test
+from model.Multi_Scale_Patch_Mixer_with_Shift_Squeezed_hidden import MultiscaleMixer
 
 def make_datasets(tr_transform,
                   v_transform,
