@@ -155,7 +155,8 @@ class ShiftBlock(nn.Module):
             nn.LayerNorm(patch_dim),
         )
 
-        self.channel_mixer_F = nn.Conv1d(patch_dim, patch_dim, kernel_size=1, stride=1)
+        # self.channel_mixer_F = nn.Conv1d(patch_dim, patch_dim, kernel_size=1, stride=1)
+        self.channel_mixer_F = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
 
         self.alpha = nn.Parameter(torch.ones(1), requires_grad=True)
 
@@ -166,13 +167,14 @@ class ShiftBlock(nn.Module):
         x_r = channel_shift(x, shift=self.shift_r, shift_size=self.shift_size)
 
         x_l = einops.rearrange(x_l, 'b c n -> b n c')
-        x_r = einops.rearrange(x_r, 'b c n -> b n c')
+        # x_r = einops.rearrange(x_r, 'b c n -> b n c')
         x_l = self.channel_mixer_l(x_l)
-        x_r = self.channel_mixer_r(x_r)
+        # x_r = self.channel_mixer_r(x_r)
         x_l = einops.rearrange(x_l, 'b n c -> b c n')
-        x_r = einops.rearrange(x_r, 'b n c -> b c n')
+        # x_r = einops.rearrange(x_r, 'b n c -> b c n')
 
-        z = self.alpha * x_l + (1 - self.alpha) * x_r
+        # z = self.alpha * x_l + (1 - self.alpha) * x_r
+        z = x_l
 
         z = self.channel_mixer_F(z) + x
 

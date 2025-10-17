@@ -17,7 +17,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 
 # from model.Multi_Scale_Patch_Mixer_ori import MultiscaleMixer
 from model.Multi_Scale_Patch_Mixer_with_Shift import MultiscaleMixer
-from loss.loss_func import Info_NCELoss_test
+from utils.earlystopping import EarlyStopping
 
 def make_datasets(tr_transform,
                   v_transform,
@@ -258,6 +258,8 @@ def main(cfg):
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
     scheduler = CosineAnnealingLR(optimizer, T_max=cfg.epochs, eta_min=1e-6)
     # scheduler = ExponentialLR(optimizer, gamma=0.9)
+    
+    early_stopping = EarlyStopping(patience=50, mode='min', verbose=True)
 
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
@@ -307,6 +309,11 @@ def main(cfg):
             print(f"Epoch {epoch + 1}: 검증 손실이 감소했습니다. 최적의 모델을 {best_model_path}에 저장했습니다.")
 
         print(f"lr : {scheduler.get_last_lr()[0]} \n Epoch {epoch + 1}/{cfg.epochs}, Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
+        
+        early_stopping(val_loss)
+        if early_stopping.early_stop:
+            print("Early stopping triggered. Training halted.")
+            break
 
     # 결과를 DataFrame으로 변환하여 CSV로 저장
     results_df = pd.DataFrame(results)
