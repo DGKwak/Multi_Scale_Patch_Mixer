@@ -164,7 +164,7 @@ class ShiftBlock(nn.Module):
         x = self.channel_mixer_S(x)
 
         x_l = channel_shift(x, shift=self.shift_l, shift_size=self.shift_size)
-        x_r = channel_shift(x, shift=self.shift_r, shift_size=self.shift_size)
+        # x_r = channel_shift(x, shift=self.shift_r, shift_size=self.shift_size)
 
         x_l = einops.rearrange(x_l, 'b c n -> b n c')
         # x_r = einops.rearrange(x_r, 'b c n -> b n c')

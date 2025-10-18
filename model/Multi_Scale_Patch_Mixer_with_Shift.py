@@ -152,6 +152,7 @@ class ShiftBlock(nn.Module):
         )
 
         self.channel_mixer_F = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
+        # self.channel_mixer_F = nn.Conv1d(patch_dim, patch_dim, kernel_size=1, stride=1)
 
         self.alpha = nn.Parameter(torch.ones(1), requires_grad=True)
 
@@ -282,3 +283,43 @@ class MultiscaleMixer(nn.Module):
         logit = self.head(x)
         
         return logit, Mixer_output
+
+def model_768_2_8():
+    model = MultiscaleMixer(in_channels=3,
+                            patch_dim=768,
+                            num_layers=8,
+                            dropout=0.1,
+                            patches=[(224, 2), (224, 4)],
+                            act='relu')
+    
+    return model
+
+def model_128_2_8():
+    model = MultiscaleMixer(in_channels=3,
+                            patch_dim=128,
+                            num_layers=8,
+                            dropout=0.1,
+                            patches=[(224, 2), (224, 4)],
+                            act='relu')
+    
+    return model
+
+def model_768_1_8():
+    model = MultiscaleMixer(in_channels=3,
+                            patch_dim=768,
+                            num_layers=8,
+                            dropout=0.1,
+                            patches=[(224, 2)],
+                            act='relu')
+
+    return model
+
+def model_128_1_8():
+    model = MultiscaleMixer(in_channels=3,
+                            patch_dim=128,
+                            num_layers=8,
+                            dropout=0.1,
+                            patches=[(224, 2)],
+                            act='relu')
+    
+    return model

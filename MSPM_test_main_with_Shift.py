@@ -16,6 +16,7 @@ import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
 
 # from model.Multi_Scale_Patch_Mixer_ori import MultiscaleMixer
+import model.Multi_Scale_Patch_Mixer_with_Shift as ShiftMixer
 from model.Multi_Scale_Patch_Mixer_with_Shift import MultiscaleMixer
 from utils.earlystopping import EarlyStopping
 
@@ -242,14 +243,16 @@ def main(cfg):
                                                             cfg.data.random_state)
     
     # Model
-    model = MultiscaleMixer(
-        in_channels=cfg.model.in_channels,
-        patch_dim=cfg.model.patch_dim,
-        num_layers=cfg.model.num_layers,
-        dropout=cfg.model.dropout,
-        patches=cfg.model.patches,
-        act=cfg.model.activation,
-    ).to(device)
+    # model = MultiscaleMixer(
+    #     in_channels=cfg.model.in_channels,
+    #     patch_dim=cfg.model.patch_dim,
+    #     num_layers=cfg.model.num_layers,
+    #     dropout=cfg.model.dropout,
+    #     patches=cfg.model.patches,
+    #     act=cfg.model.activation,
+    # ).to(device)
+
+    model = ShiftMixer.model_768_2_8().to(device)
 
     # loss Function
     cross_entropy = nn.CrossEntropyLoss()
@@ -259,7 +262,7 @@ def main(cfg):
     scheduler = CosineAnnealingLR(optimizer, T_max=cfg.epochs, eta_min=1e-6)
     # scheduler = ExponentialLR(optimizer, gamma=0.9)
     
-    early_stopping = EarlyStopping(patience=50, mode='min', verbose=True)
+    early_stopping = EarlyStopping(patience=60, mode='min', verbose=True)
 
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
@@ -310,10 +313,10 @@ def main(cfg):
 
         print(f"lr : {scheduler.get_last_lr()[0]} \n Epoch {epoch + 1}/{cfg.epochs}, Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
         
-        early_stopping(val_loss)
-        if early_stopping.early_stop:
-            print("Early stopping triggered. Training halted.")
-            break
+        # early_stopping(val_loss)
+        # if early_stopping.early_stop:
+        #     print("Early stopping triggered. Training halted.")
+        #     break
 
     # 결과를 DataFrame으로 변환하여 CSV로 저장
     results_df = pd.DataFrame(results)
