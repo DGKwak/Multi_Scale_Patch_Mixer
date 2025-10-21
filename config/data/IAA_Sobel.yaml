@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+
+dataset_name: "UoG IAA_Sobel"
+train_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel/train"
+val_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel/val"
+test_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel/test"
+input_size: 224
+random_state: 42
+num_classes: 6

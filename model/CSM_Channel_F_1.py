@@ -35,6 +35,7 @@ def shift_with_padding(x, shift, dim):
 
 def channel_shift(x, shift=[-1, 0, 1], shift_size=3):
     B, D, N = x.shape
+    assert D % shift_size == 0, "The channel dimension must be divisible by shift_size."
     
     x_chunk = torch.chunk(x, shift_size, dim=1)
     shifted_chunks = []
@@ -136,8 +137,6 @@ class ShiftBlock(nn.Module):
 
         self.channel_mixer_S = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
 
-        # self.channel_mixer_l = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
-        # self.channel_mixer_r = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
         self.channel_mixer_l = nn.Sequential(
             nn.Linear(patch_dim, patch_dim),
             get_activation(self.act),
@@ -149,7 +148,8 @@ class ShiftBlock(nn.Module):
             nn.LayerNorm(patch_dim),
         )
 
-        self.channel_mixer_F = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
+        # self.channel_mixer_F = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
+        self.channel_mixer_F = nn.Conv1d(patch_dim, patch_dim, kernel_size=1, padding=1)
 
         self.alpha = nn.Parameter(torch.ones(1), requires_grad=True)
 

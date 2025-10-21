@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+
+dataset_name: "UoG IAA_Sobel_3_KFold"
+train_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel_3_KFold/train"
+test_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel_3_KFold/test"
+input_size: 224
+random_state: 42
+num_classes: 6
+k_fold: 5

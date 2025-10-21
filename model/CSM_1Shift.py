@@ -35,6 +35,7 @@ def shift_with_padding(x, shift, dim):
 
 def channel_shift(x, shift=[-1, 0, 1], shift_size=3):
     B, D, N = x.shape
+    assert D % shift_size == 0, "The channel dimension must be divisible by shift_size."
     
     x_chunk = torch.chunk(x, shift_size, dim=1)
     shifted_chunks = []
@@ -136,18 +137,16 @@ class ShiftBlock(nn.Module):
 
         self.channel_mixer_S = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
 
-        # self.channel_mixer_l = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
-        # self.channel_mixer_r = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
         self.channel_mixer_l = nn.Sequential(
             nn.Linear(patch_dim, patch_dim),
             get_activation(self.act),
             nn.LayerNorm(patch_dim),
         )
-        self.channel_mixer_r = nn.Sequential(
-            nn.Linear(patch_dim, patch_dim),
-            get_activation(self.act),
-            nn.LayerNorm(patch_dim),
-        )
+        # self.channel_mixer_r = nn.Sequential(
+        #     nn.Linear(patch_dim, patch_dim),
+        #     get_activation(self.act),
+        #     nn.LayerNorm(patch_dim),
+        # )
 
         self.channel_mixer_F = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
 
@@ -157,16 +156,17 @@ class ShiftBlock(nn.Module):
         x = self.channel_mixer_S(x)
 
         x_l = channel_shift(x, shift=self.shift_l, shift_size=self.shift_size)
-        x_r = channel_shift(x, shift=self.shift_r, shift_size=self.shift_size)
+        # x_r = channel_shift(x, shift=self.shift_r, shift_size=self.shift_size)
 
         x_l = einops.rearrange(x_l, 'b c n -> b n c')
-        x_r = einops.rearrange(x_r, 'b c n -> b n c')
+        # x_r = einops.rearrange(x_r, 'b c n -> b n c')
         x_l = self.channel_mixer_l(x_l)
-        x_r = self.channel_mixer_r(x_r)
+        # x_r = self.channel_mixer_r(x_r)
         x_l = einops.rearrange(x_l, 'b n c -> b c n')
-        x_r = einops.rearrange(x_r, 'b n c -> b c n')
+        # x_r = einops.rearrange(x_r, 'b n c -> b c n')
 
-        z = self.alpha * x_l + (1 - self.alpha) * x_r
+        # z = self.alpha * x_l + (1 - self.alpha) * x_r
+        z = x_l  # Only use left shift branch
 
         z = self.channel_mixer_F(z) + x
 

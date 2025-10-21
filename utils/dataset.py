@@ -6,7 +6,7 @@ from torchvision import datasets
 from torch.utils.data import Dataset
 from skimage import io
 
-from utils.augmentation import apply_dwt_augmentation, extract_sobel_features
+# from utils.augmentation import apply_dwt_augmentation, extract_sobel_features
 
 # class MD_dataset(Dataset):
 #     def __init__(self, 
@@ -65,16 +65,24 @@ class Sobel_dataset(Dataset):
         self.class_to_idx = {}
         self.data_list = []
         
-        for class_idx, class_name in enumerate(sorted(os.listdir(data_path))):
-            class_path = os.path.join(data_path, class_name)            
+        for class_idx, class_name in enumerate(sorted(os.listdir(self.data_path))):
+            class_path = os.path.join(self.data_path, class_name)            
             self.class_to_idx[class_name] = class_idx
             
             for file in glob.glob(os.path.join(class_path, '*.npy')):
                 self.data_list.append((file, class_idx))
-    
+        
+        self.label_list = [label for _, label in self.data_list]
+
+    def get_class(self):
+        return sorted(os.listdir(self.data_path))
+
     def __len__(self):
         return len(self.data_list)
     
+    def get_labels(self):
+        return self.label_list
+
     def __getitem__(self, idx):
         file_path, label = self.data_list[idx]
         

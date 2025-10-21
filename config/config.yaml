@@ -1,17 +1,22 @@
 defaults:
   - model: default
-  - loss: loss
   - data:
-      - STFT
+      - IAA
   - _self_
 
-experiment_name: "Multi-Patch_MLP-Mixer"
+# General config
+experiment_name: "CSM"
 num_classes: 6
 epochs: 200
 learning_rate: 1e-3
 batch_size: 32
 num_workers: 8
 weight_decay: 1e-4
+random_state: 2024
+# Loss config
+lambda_aux: 0.3
+temperature: 1
+# Paths
 csv_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/results"
 confusion_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/results/confusion"
 best_model_path: "/home/eslab/Vscode/MultiPatchdopplerMLP/checkpoints"

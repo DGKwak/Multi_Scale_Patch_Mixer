@@ -1,7 +1,38 @@
 #!/bin/bash
 
 # CSM default test
-uv run MSPM_test_main_with_Shift.py experiment_name="CSM_default_test" | tee ./logs/output_CSM_default_test.log
+# uv run MSPM_test_main_with_Shift.py experiment_name="CSM_default_test" | tee ./logs/output_CSM_default_test.log
+
+# CSM default seed test
+# uv run MSPM_test_main_with_Shift.py random_seed=1 experiment_name="CSM_default_seed1_test" | tee ./logs/output_CSM_default_seed1_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=2 experiment_name="CSM_default_seed2_test" | tee ./logs/output_CSM_default_seed2_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=50 experiment_name="CSM_default_seed50_test" | tee ./logs/output_CSM_default_seed50_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=100 experiment_name="CSM_default_seed100_test" | tee ./logs/output_CSM_default_seed100_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=52 experiment_name="CSM_default_seed52_test" | tee ./logs/output_CSM_default_seed52_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=2024 experiment_name="CSM_default_seed2024_test" | tee ./logs/output_CSM_default_seed2024_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=777 experiment_name="CSM_default_seed777_test" | tee ./logs/output_CSM_default_seed777_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=999 experiment_name="CSM_default_seed999_test" | tee ./logs/output_CSM_default_seed999_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=1024 experiment_name="CSM_default_seed1024_test" | tee ./logs/output_CSM_default_seed1024_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=2048 experiment_name="CSM_default_seed2048_test" | tee ./logs/output_CSM_default_seed2048_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=1000 experiment_name="CSM_default_seed777_test" | tee ./logs/output_CSM_default_seed777_test.log
+# uv run MSPM_test_main_with_Shift.py random_seed=500 experiment_name="CSM_default_seed999_test" | tee ./logs/output_CSM_default_seed999_test.log
+# uv run main.py --multirun random_state=2024,1,42,100,999 experiment_name='CSM_seed_2024_datasplit_712','CSM_seed_1_datasplit_712','CSM_seed_42_datasplit_712','CSM_seed_100_datasplit_712','CSM_seed_999_datasplit_712'
+
+# CSM patch dim - 128 / layers 8, 4
+# uv run main.py experiment_name="CSM_patch_dim_128_layers_8" model.patch_dim=128
+# uv run main.py experiment_name="CSM_patch_dim_128_layers_4" model.num_layers=4 model.patch_dim=128
+
+# CSM patch dim - 256 / layers 8, 4
+# uv run main.py experiment_name="CSM_patch_dim_256_layers_8" model.patch_dim=256
+# uv run main.py experiment_name="CSM_patch_dim_256_layers_4" model.num_layers=4 model.patch_dim=256
+
+# CSM patch dim - 672 / layers 8, 4
+uv run main.py experiment_name="CSM_patch_dim_672_layers_8" model.patch_dim=672
+uv run main.py experiment_name="CSM_patch_dim_672_layers_4" model.num_layers=4 model.patch_dim=672
+
+# CSM patch dim - 768 / layers 8, 4
+uv run main.py experiment_name="CSM_patch_dim_768_layers_8"
+uv run main.py experiment_name="CSM_patch_dim_768_layers_4" model.num_layers=4
 
 # CSM with 1 shift block
 # uv run MSPM_test_main_with_Shift.py experiment_name="CSM_with_1_Shift_test" | tee ./logs/output_CSM_with_1_Shift_test.log

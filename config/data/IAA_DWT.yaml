@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+
+dataset_name: "UoG IAA_DWT"
+train_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_DWT_Sobel_kfold/train"
+test_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_DWT_Sobel_kfold/val"
+input_size: 224
+random_state: 42
+num_classes: 6
+k_fold: 5

@@ -40,7 +40,6 @@ def channel_shift(x, shift=[-1, 0, 1], shift_size=3):
     shifted_chunks = []
 
     for chunk, sh in zip(x_chunk, shift):
-        # shifted = torch.roll(chunk, shifts=sh, dims=2)
         shifted = shift_with_padding(chunk, sh, dim=2)
         shifted_chunks.append(shifted)
     
@@ -136,8 +135,6 @@ class ShiftBlock(nn.Module):
 
         self.channel_mixer_S = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
 
-        # self.channel_mixer_l = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
-        # self.channel_mixer_r = MlpBlock(1, patch_dim, patch_dim*2, patch_dim, self.act, self.dropout)
         self.channel_mixer_l = nn.Sequential(
             nn.Linear(patch_dim, patch_dim),
             get_activation(self.act),
@@ -193,6 +190,11 @@ class MultiscaleMixer(nn.Module):
                  num_layers,
                  dropout,
                  patches=[(224, 2), (224, 4)],
+                 stride=[(224, 2), (224, 4)],
+                 shift_size=3,
+                 shift_l=[-1,0,1],
+                 shift_r=[1,0,-1],
+                 num_patches=[112, 56],
                  act='gelu',):
         super().__init__()
         
@@ -200,18 +202,19 @@ class MultiscaleMixer(nn.Module):
         self.num_layers = num_layers
         self.dropout = dropout
         self.patches = patches
+        self.stride = stride
+        self.shift_size = shift_size
+        self.shift_l = shift_l
+        self.shift_r = shift_r
         self.act = act
-        self.num_patches = []
-
-        for x in self.patches:
-            self.num_patches.append(224//x[1] * 224//x[0])
+        self.num_patches = num_patches
         
         self.patch_embedding = nn.ModuleList([
             nn.Conv2d(in_channels=self.in_channels,
                       out_channels=patch_dim,
                       kernel_size=x,
-                      stride=x)
-            for x in self.patches
+                      stride=y)
+            for (x, y) in zip(self.patches, self.stride)
         ])
         
         self.positional_embedding = nn.ModuleList([
@@ -229,7 +232,7 @@ class MultiscaleMixer(nn.Module):
 
         self.shift_block = nn.ModuleList([
             nn.ModuleList([
-                ShiftBlock(patch_dim, shift_l=[-1,0,1], shift_r=[1,0,-1], shift_size=3)
+                ShiftBlock(patch_dim, shift_l=self.shift_l, shift_r=self.shift_r, shift_size=self.shift_size)
                 for _ in range(self.num_layers)
             ])
             for _ in range(len(self.patches))

@@ -1,4 +1,3 @@
-import random
 import os
 import datetime
 import hydra
@@ -17,28 +16,24 @@ import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
 
 # from model.Multi_Scale_Patch_Mixer_ori import MultiscaleMixer
+from utils.dataset import Sobel_dataset
+# from model.Multi_Scale_Patch_Mixer_with_Shift import MultiscaleMixer
 import model.Multi_Scale_Patch_Mixer_with_Shift as ShiftMixer
-from model.Multi_Scale_Patch_Mixer_with_Shift import MultiscaleMixer
 from utils.earlystopping import EarlyStopping
 
-def make_datasets(tr_transform,
-                  v_transform,
-                  train_dir,
+def make_datasets(train_dir,
                   val_dir,
                   test_dir,):
     # 데이터셋 로드
-    train_transform = instantiate(tr_transform)
-    val_transform = instantiate(v_transform)
-
-    train_dataset = datasets.ImageFolder(root=train_dir, transform=train_transform)
-    val_dataset = datasets.ImageFolder(root=val_dir, transform=val_transform)
-    test_dataset = datasets.ImageFolder(root=test_dir, transform=val_transform)
+    train_dataset = Sobel_dataset(train_dir, is_train=True)
+    val_dataset = Sobel_dataset(val_dir, is_train=False)
+    test_dataset = Sobel_dataset(test_dir, is_train=False)
 
     # 데이터셋 정보 출력
     print(f"총 데이터셋 크기: {len(train_dataset)}")
     print(f"검증 데이터셋 크기: {len(val_dataset)}")
-    print(f"클래스 수: {len(train_dataset.classes)}")
-    print(f"클래스 목록: {train_dataset.classes}")
+    print(f"클래스 수: {len(train_dataset.get_class())}")
+    print(f"클래스 목록: {train_dataset.get_class()}")
 
     return train_dataset, val_dataset, test_dataset
 
@@ -70,15 +65,6 @@ def make_dataloaders(train_dataset,
                              shuffle=False)
     
     return train_loader, val_loader, test_loader
-
-def set_seed(seed_value):
-    random.seed(seed_value)
-    np.random.seed(seed_value)
-    torch.manual_seed(seed_value)
-    torch.cuda.manual_seed(seed_value)
-    torch.cuda.manual_seed_all(seed_value)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
 
 def train(model, 
           loader, 
@@ -217,20 +203,19 @@ def plot_confusion_matrix(y_true, y_pred, class_names, experiment_name, save_pat
     print(f"Confusion matrix saved to {cm_path}")
     return cm_path
 
-@hydra.main(config_path='./config', config_name='config')
+@hydra.main(config_path='./config', config_name='CSM_config')
 def main(cfg):
     metadata = {
         'Experiment Name': cfg.experiment_name,
         'Dataset': cfg.data.dataset_name,
         'input_size': cfg.data.input_size,
-        'random_state': cfg.random_seed,
+        'random_state': cfg.data.random_state,
         'epochs': cfg.epochs,
         'batch_size': cfg.batch_size,
         'learning_rate': cfg.learning_rate,
         'layers': cfg.model.num_layers,
         'Activation': cfg.model.activation,
         'Patch Size': cfg.model.patches,
-        'Patch Dim': cfg.model.patch_dim,
         'Dropout': cfg.model.dropout,
     }
 
@@ -242,9 +227,7 @@ def main(cfg):
         device = torch.device('cpu')
     print(f"Using device: {device}")
 
-    train_dataset, val_dataset, test_dataset = make_datasets(cfg.data.train,
-                                                             cfg.data.val,
-                                                             cfg.data.train_dir,
+    train_dataset, val_dataset, test_dataset = make_datasets(cfg.data.train_dir,
                                                              cfg.data.val_dir,
                                                             cfg.data.test_dir,)
     
@@ -255,17 +238,35 @@ def main(cfg):
                                                             cfg.batch_size,
                                                             cfg.data.random_state)
     
-    set_seed(cfg.random_seed)
-    
     # Model
-    model = MultiscaleMixer(
-        in_channels=cfg.model.in_channels,
-        patch_dim=cfg.model.patch_dim,
-        num_layers=cfg.model.num_layers,
-        dropout=cfg.model.dropout,
-        patches=cfg.model.patches,
-        act=cfg.model.activation,
-    ).to(device)
+    # model = MultiscaleMixer(
+    #     in_channels=cfg.model.in_channels,
+    #     patch_dim=cfg.model.patch_dim,
+    #     num_layers=cfg.model.num_layers,
+    #     dropout=cfg.model.dropout,
+    #     patches=cfg.model.patches,
+    #     act=cfg.model.activation,
+    # ).to(device)
+
+    # model = ShiftMixer.model_768_2_8().to(device)
+
+    if cfg.test_model_name == 'test_model_768_8_2_01':
+        model = ShiftMixer.test_model_768_8_2_01().to(device)
+    elif cfg.test_model_name == 'test_model_768_8_2_02':
+        model = ShiftMixer.test_model_768_8_2_02().to(device)
+    elif cfg.test_model_name == 'test_model_768_4_2_01':
+        model = ShiftMixer.test_model_768_4_2_01().to(device)
+    elif cfg.test_model_name == 'test_model_768_4_2_02':
+        model = ShiftMixer.test_model_768_4_2_02().to(device)
+
+    elif cfg.test_model_name == 'test_model_128_8_2_01':
+        model = ShiftMixer.test_model_128_8_2_01().to(device)
+    elif cfg.test_model_name == 'test_model_128_8_2_02':
+        model = ShiftMixer.test_model_128_8_2_02().to(device)
+    elif cfg.test_model_name == 'test_model_128_4_2_01':
+        model = ShiftMixer.test_model_128_4_2_01().to(device)
+    elif cfg.test_model_name == 'test_model_128_4_2_02':
+        model = ShiftMixer.test_model_128_4_2_02().to(device)
 
     # loss Function
     cross_entropy = nn.CrossEntropyLoss()
@@ -275,7 +276,7 @@ def main(cfg):
     scheduler = CosineAnnealingLR(optimizer, T_max=cfg.epochs, eta_min=1e-6)
     # scheduler = ExponentialLR(optimizer, gamma=0.9)
     
-    early_stopping = EarlyStopping(patience=30, mode='min', verbose=True)
+    early_stopping = EarlyStopping(patience=60, mode='min', verbose=True)
 
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
@@ -370,7 +371,7 @@ def main(cfg):
         
         # Confusion Matrix 생성 및 저장
         plot_save_path = cfg.confusion_path
-        cm_path = plot_confusion_matrix(targets, predictions, train_dataset.classes, 
+        cm_path = plot_confusion_matrix(targets, predictions, train_dataset.get_class(), 
                                       cfg.experiment_name, plot_save_path)
         
         # 테스트 결과를 메타데이터에 추가하여 저장
@@ -390,7 +391,7 @@ def main(cfg):
             f.write("\n")
             # 클래스별 정확도도 저장
             f.write("# Classification Report\n")
-            f.write(classification_report(targets, predictions, target_names=train_dataset.classes))
+            f.write(classification_report(targets, predictions, target_names=train_dataset.get_class()))
         
         print(f"Test results saved to {test_results_path}")
         
