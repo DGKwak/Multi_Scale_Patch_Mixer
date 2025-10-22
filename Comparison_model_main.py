@@ -1,1 +1,0 @@
-# EfficientNet, MobileNet, Deit, MobileViT

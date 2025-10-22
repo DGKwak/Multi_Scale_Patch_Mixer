@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Comparison Model Test
+uv run Deit_main.py
+uv run Effi_main.py
+uv run Mobv1_main.py
+uv run Mobv2_main.py
+uv run MobViT_main.py
+
 # CSM default test
 # uv run MSPM_test_main_with_Shift.py experiment_name="CSM_default_test" | tee ./logs/output_CSM_default_test.log
 
@@ -27,12 +34,12 @@
 # uv run main.py experiment_name="CSM_patch_dim_256_layers_4" model.num_layers=4 model.patch_dim=256
 
 # CSM patch dim - 672 / layers 8, 4
-uv run main.py experiment_name="CSM_patch_dim_672_layers_8" model.patch_dim=672
-uv run main.py experiment_name="CSM_patch_dim_672_layers_4" model.num_layers=4 model.patch_dim=672
+# uv run main.py experiment_name="CSM_patch_dim_672_layers_8" model.patch_dim=672
+# uv run main.py experiment_name="CSM_patch_dim_672_layers_4" model.num_layers=4 model.patch_dim=672
 
 # CSM patch dim - 768 / layers 8, 4
-uv run main.py experiment_name="CSM_patch_dim_768_layers_8"
-uv run main.py experiment_name="CSM_patch_dim_768_layers_4" model.num_layers=4
+# uv run main.py experiment_name="CSM_patch_dim_768_layers_8"
+# uv run main.py experiment_name="CSM_patch_dim_768_layers_4" model.num_layers=4
 
 # CSM with 1 shift block
 # uv run MSPM_test_main_with_Shift.py experiment_name="CSM_with_1_Shift_test" | tee ./logs/output_CSM_with_1_Shift_test.log

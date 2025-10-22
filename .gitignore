@@ -1,10 +1,7 @@
 /.venv
 /uv.lock
-/__pycache__
-/loss/__pycache__
-/Reference_code/__pycache__
-/utils/__pycache__
-/model/__pycache__
+.DS_Store
+__pycache__
 /results
 /logs
 /outputs
