@@ -1,8 +1,9 @@
 defaults:
+  - transform
   - _self_
 
-dataset_name: "UoG IAA_Sobel_3"
-train_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel_3/train"
+dataset_name: "UoG IAA Augmented"
+train_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_DWT_Sobel_3/train"
 val_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel_3/val"
 test_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel_3/test"
 input_size: 224

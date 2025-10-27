@@ -74,7 +74,7 @@ class Sobel_dataset(Dataset):
         
         self.label_list = [label for _, label in self.data_list]
 
-    def get_class(self):
+    def get_classes(self):
         return sorted(os.listdir(self.data_path))
 
     def __len__(self):

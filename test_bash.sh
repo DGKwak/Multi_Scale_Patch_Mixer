@@ -1,11 +1,51 @@
 #!/bin/bash
 
+# MSPM with Shift - Deferent shift test
+# uv run main_new_shift.py experiment_name="MSPM_with_Shift_2_0_1" model.shift_l=[2,0,1] model.shift_r=[-1,0,-2]
+# uv run main_new_shift.py experiment_name="MSPM_with_Shift_1_0_2" model.shift_l=[1,0,2] model.shift_r=[-2,0,-1]
+# uv run main_new_shift.py experiment_name="MSPM_with_Shift_3_0_1" model.shift_l=[3,0,1] model.shift_r=[-1,0,-3]
+# uv run main_new_shift.py experiment_name="MSPM_with_Shift_1_0_3" model.shift_l=[1,0,3] model.shift_r=[-3,0,-1]
+# uv run main_new_shift.py experiment_name="MSPM_with_Shift_2_0_3" model.shift_l=[2,0,3] model.shift_r=[-3,0,-2]
+# uv run main_new_shift.py experiment_name="MSPM_with_Shift_3_0_2" model.shift_l=[3,0,2] model.shift_r=[-2,0,-3]
+# uv run main_new_shift.py experiment_name="MSPM_with_Shift_3_1_2" model.shift_l=[3,1,2] model.shift_r=[-2,-1,-3]
+
+# MSPM with 1Shift and SE block
+uv run main_1Shift_with_SE.py experiment_name="MSPM_1Shift_with_SE_CP_conv"
+
+# CSM Freq patch
+# uv run main.py experiment_name="CSM_Freq_patch_test" model.patches='[[16, 16], [4, 224]]'
+
+# CSM 16x16 patch
+# uv run main.py experiment_name="CSM_16x16_patch_test" model.patches='[[16, 16]]'
+
+# CSM single patch 224x4
+# uv run main.py experiment_name="CSM_single_patch_224_4_test" model.patches='[[224, 4]]'
+
+# CSM single patch 224x2
+# uv run main.py experiment_name="CSM_single_patch_224_2_test" model.patches='[[224, 2]]'
+
+# CSM single patch 224x1
+# uv run main.py experiment_name="CSM_single_patch_224_1_test" model.patches='[[224, 1]]'
+
+# CSM patches 224x1, 224x2
+# uv run main.py experiment_name="CSM_patches_224_1_2_test" model.patches='[[224, 1], [224, 2]]'
+
+# CSM patches 224x1, 224x4
+# uv run main.py experiment_name="CSM_patches_224_1_4_test" model.patches='[[224, 1], [224, 4]]'
+
 # Comparison Model Test
-uv run Deit_main.py
-uv run Effi_main.py
-uv run Mobv1_main.py
-uv run Mobv2_main.py
-uv run MobViT_main.py
+# uv run Deit_main.py
+# uv run Effi_main.py
+# uv run Mobv1_main.py
+# uv run Mobv2_main.py
+# uv run MobViT_main.py
+
+# New Shift
+# uv run main_shiftatt.py experiment_name="New_Shift_Attention_test"
+
+# New Residual CSM
+# uv run main_New_res.py experiment_name="CSM_New_residual_test"
+# uv run main_New_res.py experiment_name="CSM_New_Linear_128_4_test" model.patch_dim=128 model.num_layers=4
 
 # CSM default test
 # uv run MSPM_test_main_with_Shift.py experiment_name="CSM_default_test" | tee ./logs/output_CSM_default_test.log

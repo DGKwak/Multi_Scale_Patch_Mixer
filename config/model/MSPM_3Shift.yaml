@@ -4,8 +4,9 @@ num_layers: 8
 dropout: 0.1
 activation: "relu"
 shift_size: 3
-shift_l: [-1, 0, 1]
-shift_r: [1, 0, -1]
+shift_l: [3, 0, 2]
+shift_c: [-2, 0, -3]
+shift_r: [2, 0, 3]
 patches:
   - [224, 2]
   - [224, 4]

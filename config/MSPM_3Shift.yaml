@@ -1,11 +1,11 @@
 defaults:
-  - model: CSM
+  - model: MSPM_3Shift
   - data:
-      - IAA_Sobel
+      - IAA
   - _self_
 
 # General config
-experiment_name: "CSM_IAA_Augmented"
+experiment_name: "MSPM_with_3Shift"
 num_classes: 6
 epochs: 200
 learning_rate: 1e-3

@@ -2,6 +2,16 @@ import model.Multi_Scale_Patch_Mixer_with_Shift as Shift
 import model.Multi_Scale_Patch_Mixer_with_Shift_Squeezed_hidden as SQShift
 import model.Lightweight_Multi_Scale_Patch_Mixer_with_Shift as LWShift
 from Reference_code.MLP_Mixer import MLPMixer
+from model.CSM_New_residual import MultiscaleMixer
+from model.CSM_revision05 import MultiscaleMixer as CSM_Rev05
+from model.CSM_low_rank import MultiscaleMixer as CSM_Low_Rank
+
+from Reference_code.Comparison_model.DeiT import model as Deit
+from Reference_code.Comparison_model.EfficientNet import model as EfficientNet
+from Reference_code.Comparison_model.MobileNetv1 import model as MobileNetv1
+from Reference_code.Comparison_model.MobileNetv2 import model as MobileNetv2
+from Reference_code.Comparison_model.MobileViT import model as MobileViT
+from Reference_code.Comparison_model.ShuffleNet import model as ShuffleNet
 
 # Shift 모델 기본 기준
 # Shift_768_2_8 = Shift.MultiscaleMixer(3, 768, 8, 0.1, patches=[(224, 2), (224, 4)], act='relu')
@@ -21,7 +31,7 @@ from Reference_code.MLP_Mixer import MLPMixer
 # LWShift_768_1_8 = LWShift.MultiscaleMixer(3, 768, 8, 0.1, patches=[(224, 2)], act='relu')
 # LWShift_128_1_8 = LWShift.MultiscaleMixer(3, 128, 8, 0.1, patches=[(224, 2)], act='relu')
 
-save_path = './results/model_param/'
+# save_path = './results/model_param/'
 
 # file_name = ['Shift_768_2_8', 'Shift_768_1_8', 'Shift_128_2_8', 'Shift_128_1_8',
 #              'SHShift_768_2_8', 'SHShift_768_1_8', 'SHShift_128_2_8', 'SHShift_128_1_8',
@@ -85,6 +95,50 @@ save_path = './results/model_param/'
 #             if param.requires_grad:
 #                 f.write(f'{name}: {param.numel()}\n')
 
-MLP_Mixer_Small = MLPMixer(in_channels=3, dim=512, token_dim=256, channel_dim=2048, dropout=0.1, patch_size=16, image_size=224, depth=8, num_classes=6)
+# MLP_Mixer_Small = MLPMixer(in_channels=3, dim=512, token_dim=256, channel_dim=2048, dropout=0.1, patch_size=16, image_size=224, depth=8, num_classes=6)
+# print(f'MLP Mixer Small model parameters: {sum(p.numel() for p in MLP_Mixer_Small.parameters() if p.requires_grad)}')
 
-print(f'MLP Mixer Small model parameters: {sum(p.numel() for p in MLP_Mixer_Small.parameters() if p.requires_grad)}')
+# model = Deit.deit_tiny_patch16_224(pretrained=False, num_classes=6)
+# print('DeiT Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = EfficientNet.EfficientNet.from_name('efficientnet-b0', num_classes=6)
+# print('EfficientNet Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MobileNetv1.MobileNetV1(ch_in=3, n_classes=6)
+# print('MobileNetV1 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MobileNetv2.MobileNetV2(ch_in=3, n_classes=6)
+# print('MobileNetV2 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MobileViT.mobilevit_xxs_for_test()
+# print('MobileViT Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = ShuffleNet.ShuffleNet(num_classes=6)
+# print('ShuffleNet Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MultiscaleMixer(3, 768, 8, 0.1, act='relu')
+# print('CSM New Residual Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = CSM_Rev05(3, 786, 8, 0.1, act='relu')
+# print('CSM Revision05 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = Shift.MultiscaleMixer(3, 128, 4, 0.1, act='relu')
+# print('Original Shift 128_4 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = Shift.MultiscaleMixer(3, 128, 8, 0.1, act='relu')
+# print('Original Shift 128_8 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = Shift.MultiscaleMixer(3, 256, 4, 0.1, act='relu')
+# print('Original Shift 256_4 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = Shift.MultiscaleMixer(3, 256, 8, 0.1, act='relu')
+# print('Original Shift 256_8 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = Shift.MultiscaleMixer(3, 768, 4, 0.1, act='relu')
+# print('Original Shift 768_4 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = Shift.MultiscaleMixer(3, 768, 8, 0.1, act='relu')
+print('Original Shift 768_8 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = CSM_Low_Rank(3, 768, 8, 0.1, act='relu')
+print('CSM Low Rank Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))

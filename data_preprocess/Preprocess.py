@@ -55,13 +55,13 @@ def extract_sobel_features(data):
     ch_3 = np.stack([Dx, Dy, Dxy], axis=0)
     ch_4 = np.stack([data, Dx, Dy, Dxy], axis=0)
     
-    return ch_3, ch_4
+    return ch_4, ch_3
 
 if __name__ == "__main__":
     data_path = '/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA'
-    sobel_path = '/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel'
+    # sobel_path = '/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel'
     sobel_3_path = '/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_Sobel_3'
-    dwt_sobel_path = '/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_DWT_Sobel'
+    # dwt_sobel_path = '/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_DWT_Sobel'
     dwt_sobel_3_path = '/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_DWT_Sobel_3'
 
     category = ['train', 'val', 'test']
@@ -73,12 +73,12 @@ if __name__ == "__main__":
         data_classes = img_data.classes
 
         for cls in data_classes:
-            if not os.path.exists(os.path.join(sobel_path, cat, cls)):
-                os.makedirs(os.path.join(sobel_path, cat, cls))
+            # if not os.path.exists(os.path.join(sobel_path, cat, cls)):
+            #     os.makedirs(os.path.join(sobel_path, cat, cls))
             if not os.path.exists(os.path.join(sobel_3_path, cat, cls)):
                 os.makedirs(os.path.join(sobel_3_path, cat, cls))
-            if not os.path.exists(os.path.join(dwt_sobel_path, cat, cls)):
-                os.makedirs(os.path.join(dwt_sobel_path, cat, cls))
+            # if not os.path.exists(os.path.join(dwt_sobel_path, cat, cls)):
+            #     os.makedirs(os.path.join(dwt_sobel_path, cat, cls))
             if not os.path.exists(os.path.join(dwt_sobel_3_path, cat, cls)):
                 os.makedirs(os.path.join(dwt_sobel_3_path, cat, cls))
 
@@ -88,27 +88,27 @@ if __name__ == "__main__":
             img = io.imread(img_path, as_gray=True)
             img = transform.resize(img, (224, 224))
 
-            sobel_3_img, sobel_4_img = extract_sobel_features(img)
+            sobel_4_img, sobel_3_img = extract_sobel_features(img)
             dwt_1, dwt_2, dwt_3 = apply_dwt_augmentation(img, wavelet='haar')
 
             sobel_dwt_4_1, sobel_dwt_3_1 = extract_sobel_features(dwt_1)
             sobel_dwt_4_2, sobel_dwt_3_2 = extract_sobel_features(dwt_2)
             sobel_dwt_4_3, sobel_dwt_3_3 = extract_sobel_features(dwt_3)
 
-            save_path_sobel = os.path.join(sobel_path, cat, data_classes[label], f'{img_name}_Sobel.npy')
+            # save_path_sobel = os.path.join(sobel_path, cat, data_classes[label], f'{img_name}_Sobel.npy')
             save_path_sobel_3 = os.path.join(sobel_3_path, cat, data_classes[label], f'{img_name}_Sobel_3.npy')
-            save_path_dwt_1 = os.path.join(dwt_sobel_path, cat, data_classes[label], f'{img_name}_DWT_1.npy')
-            save_path_dwt_2 = os.path.join(dwt_sobel_path, cat, data_classes[label], f'{img_name}_DWT_2.npy')
-            save_path_dwt_3 = os.path.join(dwt_sobel_path, cat, data_classes[label], f'{img_name}_DWT_3.npy')
-            save_path_dwt_3_1 = os.path.join(dwt_sobel_path, cat, data_classes[label], f'{img_name}_DWT_3_1.npy')
-            save_path_dwt_3_2 = os.path.join(dwt_sobel_path, cat, data_classes[label], f'{img_name}_DWT_3_2.npy')
-            save_path_dwt_3_3 = os.path.join(dwt_sobel_path, cat, data_classes[label], f'{img_name}_DWT_3_3.npy')
+            # save_path_dwt_1 = os.path.join(dwt_sobel_path, cat, data_classes[label], f'{img_name}_DWT_1.npy')
+            # save_path_dwt_2 = os.path.join(dwt_sobel_path, cat, data_classes[label], f'{img_name}_DWT_2.npy')
+            # save_path_dwt_3 = os.path.join(dwt_sobel_path, cat, data_classes[label], f'{img_name}_DWT_3.npy')
+            save_path_dwt_3_1 = os.path.join(dwt_sobel_3_path, cat, data_classes[label], f'{img_name}_DWT_3_1.npy')
+            save_path_dwt_3_2 = os.path.join(dwt_sobel_3_path, cat, data_classes[label], f'{img_name}_DWT_3_2.npy')
+            save_path_dwt_3_3 = os.path.join(dwt_sobel_3_path, cat, data_classes[label], f'{img_name}_DWT_3_3.npy')
 
-            np.save(save_path_sobel, sobel_4_img)
+            # np.save(save_path_sobel, sobel_4_img)
             np.save(save_path_sobel_3, sobel_3_img)
-            np.save(save_path_dwt_1, sobel_dwt_4_1)
-            np.save(save_path_dwt_2, sobel_dwt_4_2)
-            np.save(save_path_dwt_3, sobel_dwt_4_3)
-            np.save(save_path_dwt_1, sobel_dwt_3_1)
-            np.save(save_path_dwt_2, sobel_dwt_3_2)
-            np.save(save_path_dwt_3, sobel_dwt_3_3)
+            # np.save(save_path_dwt_1, sobel_dwt_4_1)
+            # np.save(save_path_dwt_2, sobel_dwt_4_2)
+            # np.save(save_path_dwt_3, sobel_dwt_4_3)
+            np.save(save_path_dwt_3_1, sobel_dwt_3_1)
+            np.save(save_path_dwt_3_2, sobel_dwt_3_2)
+            np.save(save_path_dwt_3_3, sobel_dwt_3_3)
