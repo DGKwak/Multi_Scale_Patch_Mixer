@@ -1,5 +1,19 @@
 #!/bin/bash
 
+# MSPS_Mixer witout SE
+# uv run MSPS_Mixer_wo_SE_main.py experiment_name="MSPS_Mixer_without_SE_768_242"
+
+# MSPS_Mixer witout downsample
+uv run MSPS_Mixer_wo_ds_main.py experiment_name="MSPS_Mixer_without_downsample_768_242"
+
+# MSSM
+# uv run main_1Shift_with_SE_downsample02.py experiment_name="MSSM_768_242" model.patch_dim=768 model.num_layers=[2,4,2]
+# uv run main_1Shift_with_SE_downsample02.py experiment_name="MSSM_128_242" model.patch_dim=128 model.num_layers=[2,4,2]
+# uv run main_1Shift_with_SE_downsample02.py experiment_name="MSSM_768_222" model.patch_dim=768 model.num_layers=[2,2,2]
+# uv run main_1Shift_with_SE_downsample02.py experiment_name="MSSM_128_222" model.patch_dim=128 model.num_layers=[2,2,2]
+# uv run main_1Shift_with_SE_downsample02.py experiment_name="MSSM_768_22" model.patch_dim=768 model.num_layers=[2,2]
+# uv run main_1Shift_with_SE_downsample02.py experiment_name="MSSM_128_22" model.patch_dim=128 model.num_layers=[2,2]
+
 # MSPM with Shift - Deferent shift test
 # uv run main_new_shift.py experiment_name="MSPM_with_Shift_2_0_1" model.shift_l=[2,0,1] model.shift_r=[-1,0,-2]
 # uv run main_new_shift.py experiment_name="MSPM_with_Shift_1_0_2" model.shift_l=[1,0,2] model.shift_r=[-2,0,-1]
@@ -10,7 +24,7 @@
 # uv run main_new_shift.py experiment_name="MSPM_with_Shift_3_1_2" model.shift_l=[3,1,2] model.shift_r=[-2,-1,-3]
 
 # MSPM with 1Shift and SE block
-uv run main_1Shift_with_SE.py experiment_name="MSPM_1Shift_with_SE_CP_conv"
+# uv run main_1Shift_with_SE.py experiment_name="MSPM_1Shift_with_SE_CP_conv"
 
 # CSM Freq patch
 # uv run main.py experiment_name="CSM_Freq_patch_test" model.patches='[[16, 16], [4, 224]]'

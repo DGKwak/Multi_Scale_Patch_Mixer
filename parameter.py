@@ -5,6 +5,7 @@ from Reference_code.MLP_Mixer import MLPMixer
 from model.CSM_New_residual import MultiscaleMixer
 from model.CSM_revision05 import MultiscaleMixer as CSM_Rev05
 from model.CSM_low_rank import MultiscaleMixer as CSM_Low_Rank
+from model.Multi_Scale_Shift_Mixer_GLU import MultiscaleMixer as MSSM_GLU
 
 from Reference_code.Comparison_model.DeiT import model as Deit
 from Reference_code.Comparison_model.EfficientNet import model as EfficientNet
@@ -137,8 +138,11 @@ from Reference_code.Comparison_model.ShuffleNet import model as ShuffleNet
 # model = Shift.MultiscaleMixer(3, 768, 4, 0.1, act='relu')
 # print('Original Shift 768_4 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = Shift.MultiscaleMixer(3, 768, 8, 0.1, act='relu')
-print('Original Shift 768_8 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+# model = Shift.MultiscaleMixer(3, 768, 8, 0.1, act='relu')
+# print('Original Shift 768_8 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = CSM_Low_Rank(3, 768, 8, 0.1, act='relu')
-print('CSM Low Rank Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+# model = CSM_Low_Rank(3, 768, 8, 0.1, act='relu')
+# print('CSM Low Rank Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSSM_GLU(3, 128, 0.1, [2, 2], shift=[3, -2, 2, -3], shift_size=4, act='relu')
+print('MSSM GLU Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))

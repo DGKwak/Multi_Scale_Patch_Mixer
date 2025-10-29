@@ -120,7 +120,7 @@ class ShiftBlock(nn.Module):
             nn.LayerNorm(patch_dim),
             MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
         )
-        self.channel_projection = MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
+        self.channel_projection = nn.Conv1d(num_patches, num_patches, kernel_size=3, stride=1, padding=1)
         
         # SE Block
         self.squeeze = nn.AdaptiveAvgPool1d(1)

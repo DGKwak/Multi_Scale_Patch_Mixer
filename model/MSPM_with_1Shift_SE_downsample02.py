@@ -64,24 +64,6 @@ class PositionalEmbedding(nn.Module):
 
         return x + self.positional_embedding[:, :, :N]
 
-class Reweight(nn.Module):
-    def __init__(self,
-                 num_layers: int):
-        super().__init__()
-        self.num_layers = num_layers
-        
-        self.alpha = nn.Parameter(torch.ones(self.num_layers), requires_grad=True)
-
-    def forward(self, output_list):
-        weights_alpha = F.softmax(self.alpha[:self.num_layers], dim=0)
-        
-        z = torch.zeros_like(output_list[0])
-        
-        for i in range(self.num_layers):
-            z = z + output_list[i] * weights_alpha[i]
-
-        return z
-
 class MlpBlock(nn.Module):
     def __init__(self,
                  in_features: int,
@@ -120,7 +102,10 @@ class ShiftBlock(nn.Module):
             nn.LayerNorm(patch_dim),
             MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
         )
-        self.channel_projection = MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
+        self.channel_projection = nn.Sequential(
+            MlpBlock(num_patches, num_patches*2, self.act, self.dropout),
+            nn.Linear(num_patches*2, num_patches)
+        )
         
         # SE Block
         self.squeeze = nn.AdaptiveAvgPool1d(1)
@@ -144,7 +129,9 @@ class ShiftBlock(nn.Module):
 
         x_shift = channel_shift(x, shift=self.shift, shift_size=self.shift_size)
 
+        x_shift = einops.rearrange(x_shift, 'b n c -> b c n')
         x_shift = self.channel_projection(x_shift)
+        x_shift = einops.rearrange(x_shift, 'b c n -> b n c')
 
         se = self.squeeze(x_shift)
         se = einops.rearrange(se, 'b n 1 -> b n')
@@ -303,8 +290,6 @@ class MultiscaleMixer(nn.Module):
             for x in self.num_patches
         ])
 
-        self.reweight = Reweight(sum(self.num_layers))
-        
         self.head = nn.Sequential(
             nn.LayerNorm(patch_dim),
             nn.Linear(patch_dim, patch_dim//2),
@@ -328,9 +313,6 @@ class MultiscaleMixer(nn.Module):
                 z, blk_layer = blk(z)
 
                 layer_outputs.extend(blk_layer)
-            
-            # Reweighting
-            # z = self.reweight(layer_outputs)
             
             Mixer_output.append(z)
         
