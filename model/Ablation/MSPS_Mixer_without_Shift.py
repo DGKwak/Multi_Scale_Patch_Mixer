@@ -104,8 +104,20 @@ class ShiftBlock(nn.Module):
             nn.LayerNorm(patch_dim),
             MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
         )
-        self.channel_projection = MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
+        self.channel_projection = self.channel_projection = nn.Sequential(
+            MlpBlock(num_patches, num_patches*2, self.act, self.dropout),
+            nn.Linear(num_patches*2, num_patches)
+        )
         
+        # SE Block
+        self.squeeze = nn.AdaptiveAvgPool1d(1)
+        self.excitation = nn.Sequential(
+            nn.Linear(num_patches, num_patches//8),
+            get_activation(self.act),
+            nn.Linear(num_patches//8, num_patches),
+            nn.Sigmoid()
+        )
+
         self.channel_mixer_F = nn.Sequential(
             MlpBlock(patch_dim,  patch_dim*2, self.act, self.dropout),
             nn.Linear(patch_dim*2, patch_dim),
@@ -117,9 +129,15 @@ class ShiftBlock(nn.Module):
         res = x
         x = self.channel_mixer_S(x)
 
-        x_shift = channel_shift(x, shift=self.shift, shift_size=self.shift_size)
+        x = einops.rearrange(x, 'b n c -> b c n')
+        x = self.channel_projection(x)
+        x = einops.rearrange(x, 'b c n -> b n c')
 
-        z = self.channel_projection(x_shift)
+        se = self.squeeze(x)
+        se = einops.rearrange(se, 'b n 1 -> b n')
+        ex = self.excitation(se)
+        ex = einops.rearrange(ex, 'b n -> b n 1')
+        z = x * ex
 
         z = self.channel_mixer_F(z) + res
 

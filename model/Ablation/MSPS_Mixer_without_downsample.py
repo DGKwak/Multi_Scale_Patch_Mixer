@@ -104,7 +104,7 @@ class ShiftBlock(nn.Module):
             nn.LayerNorm(patch_dim),
             MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
         )
-        self.channel_projection = nn.Sequential(
+        self.channel_projection = self.channel_projection = nn.Sequential(
             MlpBlock(num_patches, num_patches*2, self.act, self.dropout),
             nn.Linear(num_patches*2, num_patches)
         )
@@ -145,31 +145,6 @@ class ShiftBlock(nn.Module):
 
         return z
 
-class Downsample(nn.Module):
-    def __init__(self,
-                 in_channels:int):
-        super().__init__()
-
-        self.norm = nn.LayerNorm(in_channels*2)
-        self.reduction = nn.Conv1d(in_channels*2,
-                                   in_channels,
-                                   kernel_size=1,
-                                   stride=1,)
-
-    def forward(self, x):
-        B, C, N = x.shape
-
-        x0 = x[:, :, 0::2]
-        x1 = x[:, :, 1::2]
-        x = torch.cat([x0, x1], dim=1)  # 채널 방향으로 concat
-
-        x = einops.rearrange(x, 'b c n -> b n c')
-        x = self.norm(x)
-        x = einops.rearrange(x, 'b n c -> b c n')
-        x = self.reduction(x)
-
-        return x
-
 # Basic Structure of Multi-Scale Patch Shift Mixer
 class BasicLayer(nn.Module):
     def __init__(self,
@@ -179,7 +154,6 @@ class BasicLayer(nn.Module):
                  shift:list =[-1, 0, 1],
                  shift_size:int =3,
                  dropout:float =0.1,
-                 downsample:bool=False,
                  act='relu'):
         super().__init__()
 
@@ -204,11 +178,6 @@ class BasicLayer(nn.Module):
             )
             for _ in range(num_layers)
         ])
-
-        if downsample:
-            self.downsample = Downsample(in_channels=patch_dim)
-        else:
-            self.downsample = None
     
     def forward(self, x):
         B, C, N = x.shape
@@ -221,9 +190,6 @@ class BasicLayer(nn.Module):
             x = einops.rearrange(x, 'b n c -> b c n')
             x = token(x) + x
             results.append(x)
-        
-        if self.downsample is not None:
-            x = self.downsample(x)
         
         return x, results
 
@@ -250,16 +216,16 @@ class MultiscaleMixer(nn.Module):
         act (str): Activation function name ('relu', 'gelu', 'leaky')
     """
     def __init__(self,
-                 in_channels:int=3,
-                 patch_dim:int=128,
-                 dropout:float=0.1,
-                 num_layers:list=[2, 2],
+                 in_channels:int,
+                 patch_dim:int,
+                 dropout:float,
+                 num_layers:list=[2, 4, 2],
                  patches:list=[(224, 2), (224, 4)],
                  stride:list=[(224, 2), (224, 4)],
                  shift_size:int=4,
                  shift:list=[3,-2,2,-3],
                  num_patches:list=[112, 56],
-                 act:str='relu'):
+                 act:str='gelu'):
         super().__init__()
         
         self.in_channels = in_channels
@@ -288,12 +254,11 @@ class MultiscaleMixer(nn.Module):
         self.blocks = nn.ModuleList([
             nn.ModuleList([
                 BasicLayer(patch_dim=patch_dim,
-                           num_patches=x//(2**idx),
+                           num_patches=x,
                            num_layers=l,
                            shift=self.shift,
                            shift_size=self.shift_size,
                            dropout=self.dropout,
-                           downsample=False if idx==len(self.num_layers)-1 else True,
                            act=self.act)
                 for idx, l in enumerate(self.num_layers)
             ])

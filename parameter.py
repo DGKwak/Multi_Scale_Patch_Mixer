@@ -1,18 +1,66 @@
-import model.Multi_Scale_Patch_Mixer_with_Shift as Shift
-import model.Multi_Scale_Patch_Mixer_with_Shift_Squeezed_hidden as SQShift
-import model.Lightweight_Multi_Scale_Patch_Mixer_with_Shift as LWShift
-from Reference_code.MLP_Mixer import MLPMixer
-from model.CSM_New_residual import MultiscaleMixer
-from model.CSM_revision05 import MultiscaleMixer as CSM_Rev05
-from model.CSM_low_rank import MultiscaleMixer as CSM_Low_Rank
-from model.Multi_Scale_Shift_Mixer_GLU import MultiscaleMixer as MSSM_GLU
+# import model.Multi_Scale_Patch_Mixer_with_Shift as Shift
+# import model.Multi_Scale_Patch_Mixer_with_Shift_Squeezed_hidden as SQShift
+# import model.Lightweight_Multi_Scale_Patch_Mixer_with_Shift as LWShift
+# from Reference_code.MLP_Mixer import MLPMixer
+# from model.CSM_New_residual import MultiscaleMixer
+# from model.CSM_revision05 import MultiscaleMixer as CSM_Rev05
+# from model.CSM_low_rank import MultiscaleMixer as CSM_Low_Rank
+# from model.Multi_Scale_Shift_Mixer_GLU import MultiscaleMixer as MSSM_GLU
 
-from Reference_code.Comparison_model.DeiT import model as Deit
-from Reference_code.Comparison_model.EfficientNet import model as EfficientNet
-from Reference_code.Comparison_model.MobileNetv1 import model as MobileNetv1
-from Reference_code.Comparison_model.MobileNetv2 import model as MobileNetv2
-from Reference_code.Comparison_model.MobileViT import model as MobileViT
-from Reference_code.Comparison_model.ShuffleNet import model as ShuffleNet
+# from Reference_code.Comparison_model.DeiT import model as Deit
+# from Reference_code.Comparison_model.EfficientNet import model as EfficientNet
+# from Reference_code.Comparison_model.MobileNetv1 import model as MobileNetv1
+# from Reference_code.Comparison_model.MobileNetv2 import model as MobileNetv2
+# from Reference_code.Comparison_model.MobileViT import model as MobileViT
+# from Reference_code.Comparison_model.ShuffleNet import model as ShuffleNet
+
+from model.MSPS_Mixer import MultiscaleMixer as MSPS_Mixer
+from model.MSPS_Mixer_without_downsample import MultiscaleMixer as MSPS_Mixer_wo_ds
+from model.MSPS_Mixer_without_SE import MultiscaleMixer as MSPS_Mixer_wo_SE
+from model.MSPS_Mixer_without_Shift import MultiscaleMixer as MSPS_Mixer_wo_Shift
+from model.MSPS_Mixer_without_ds_Shift import MultiscaleMixer as MSPS_Mixer_wo_ds_Shift
+from model.MSPS_Mixer_without_ds_SE import MultiscaleMixer as MSPS_Mixer_wo_ds_SE
+from model.MSPS_Mixer_without_SE_Shift import MultiscaleMixer as MSPS_Mixer_wo_SE_Shift
+from model.MSPS_Mixer_without_ds_Shift_SE import MultiscaleMixer as MSPS_Mixer_wo_ds_Shift_SE
+
+model = MSPS_Mixer(3, 128, 0.1, [2, 2], act='relu')
+print('MSPS Mixer 128 22 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer(3, 128, 0.1, [2, 2, 2], act='relu')
+print('MSPS Mixer 128 222 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer(3, 128, 0.1, [2, 4, 2], act='relu')
+print('MSPS Mixer 128 242 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer(3, 768, 0.1, [2, 2], act='relu')
+print('MSPS Mixer 768 22 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer(3, 768, 0.1, [2, 2, 2], act='relu')
+print('MSPS Mixer 768 222 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer(3, 768, 0.1, [2, 4, 2], act='relu')
+print('MSPS Mixer 768 242 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer_wo_ds(3, 128, 0.1, [2, 2], act='relu')
+print('MSPS Mixer without downsample Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer_wo_SE(3, 128, 0.1, [2, 2], act='relu')
+print('MSPS Mixer without SE Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer_wo_Shift(3, 128, 0.1, [2, 2], act='relu')
+print('MSPS Mixer without Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer_wo_ds_Shift(3, 128, 0.1, [2, 2], act='relu')
+print('MSPS Mixer without downsample and Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer_wo_ds_SE(3, 128, 0.1, [2, 2], act='relu')
+print('MSPS Mixer without downsample and SE Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer_wo_SE_Shift(3, 128, 0.1, [2, 2], act='relu')
+print('MSPS Mixer without SE and Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+model = MSPS_Mixer_wo_ds_Shift_SE(3, 128, 0.1, [2, 2], act='relu')
+print('MSPS Mixer without downsample, SE and Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 # Shift 모델 기본 기준
 # Shift_768_2_8 = Shift.MultiscaleMixer(3, 768, 8, 0.1, patches=[(224, 2), (224, 4)], act='relu')
@@ -144,5 +192,5 @@ from Reference_code.Comparison_model.ShuffleNet import model as ShuffleNet
 # model = CSM_Low_Rank(3, 768, 8, 0.1, act='relu')
 # print('CSM Low Rank Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSSM_GLU(3, 128, 0.1, [2, 2], shift=[3, -2, 2, -3], shift_size=4, act='relu')
-print('MSSM GLU Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+# model = MSSM_GLU(3, 128, 0.1, [2, 2], shift=[3, -2, 2, -3], shift_size=4, act='relu')
+# print('MSSM GLU Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
