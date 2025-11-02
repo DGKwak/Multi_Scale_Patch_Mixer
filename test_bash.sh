@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# MSPS Mixer ver conv test
+# uv run MSPS_Mixer_ver_conv_main.py experiment_name="MSPS_Mixer_ver_conv_128_22"
+
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_rev_ds"
+uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_16" model.patches='[[16, 16]]' model.stride='[[16, 16]]' model.num_patches=[196]
+uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_1" model.patches='[[224, 1]]' model.stride='[[224, 1]]' model.num_patches=[224]
+uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_2" model.patches='[[224, 2]]' model.stride='[[224, 2]]' model.num_patches=[112]
+uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_4" model.patches='[[224, 4]]' model.stride='[[224, 4]]' model.num_patches=[56]
+uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_1_2" model.patches='[[224, 1], [224, 2]]' model.stride='[[224, 1], [224, 2]]' model.num_patches=[224,112]
+uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_1_4" model.patches='[[224, 1], [224, 4]]' model.stride='[[224, 1], [224, 4]]' model.num_patches=[224,56]
+
 # MSPS_Mixer
 # uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_128_22"
 # uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_768_22" model.patch_dim=768
@@ -7,20 +18,20 @@
 # uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_128_222" model.patch_dim=128 model.num_layers=[2,2,2]
 # uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_768_242" model.patch_dim=768 model.num_layers=[2,4,2]
 # uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_128_242" model.patch_dim=128 model.num_layers=[2,4,2]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_96_22" model.patch_dim=96
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_64_22" model.patch_dim=64
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_256_22" model.patch_dim=256
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_512_22" model.patch_dim=512
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_96_22" model.patch_dim=96
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_64_22" model.patch_dim=64
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_256_22" model.patch_dim=256
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_512_22" model.patch_dim=512
 
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_96_222" model.patch_dim=96 model.num_layers=[2,2,2]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_64_222" model.patch_dim=64 model.num_layers=[2,2,2]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_256_222" model.patch_dim=256 model.num_layers=[2,2,2]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_512_222" model.patch_dim=512 model.num_layers=[2,2,2]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_96_222" model.patch_dim=96 model.num_layers=[2,2,2]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_64_222" model.patch_dim=64 model.num_layers=[2,2,2]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_256_222" model.patch_dim=256 model.num_layers=[2,2,2]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_512_222" model.patch_dim=512 model.num_layers=[2,2,2]
 
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_96_242" model.patch_dim=96 model.num_layers=[2,4,2]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_64_242" model.patch_dim=64 model.num_layers=[2,4,2]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_256_242" model.patch_dim=256 model.num_layers=[2,4,2]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_512_242" model.patch_dim=512 model.num_layers=[2,4,2]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_96_242" model.patch_dim=96 model.num_layers=[2,4,2]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_64_242" model.patch_dim=64 model.num_layers=[2,4,2]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_256_242" model.patch_dim=256 model.num_layers=[2,4,2]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_512_242" model.patch_dim=512 model.num_layers=[2,4,2]
 
 # uv run MSPS_Mixer_wo_ds_SE_main.py experiment_name="MSPS_Mixer_without_downsample_with_SE_128_22"
 # uv run MSPS_Mixer_wo_ds_Shift_main.py experiment_name="MSPS_Mixer_without_downsample_Shift_128_22"

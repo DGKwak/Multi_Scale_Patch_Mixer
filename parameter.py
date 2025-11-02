@@ -15,52 +15,88 @@
 # from Reference_code.Comparison_model.ShuffleNet import model as ShuffleNet
 
 from model.MSPS_Mixer import MultiscaleMixer as MSPS_Mixer
-from model.MSPS_Mixer_without_downsample import MultiscaleMixer as MSPS_Mixer_wo_ds
-from model.MSPS_Mixer_without_SE import MultiscaleMixer as MSPS_Mixer_wo_SE
-from model.MSPS_Mixer_without_Shift import MultiscaleMixer as MSPS_Mixer_wo_Shift
-from model.MSPS_Mixer_without_ds_Shift import MultiscaleMixer as MSPS_Mixer_wo_ds_Shift
-from model.MSPS_Mixer_without_ds_SE import MultiscaleMixer as MSPS_Mixer_wo_ds_SE
-from model.MSPS_Mixer_without_SE_Shift import MultiscaleMixer as MSPS_Mixer_wo_SE_Shift
-from model.MSPS_Mixer_without_ds_Shift_SE import MultiscaleMixer as MSPS_Mixer_wo_ds_Shift_SE
+# from model.MSPS_Mixer_without_downsample import MultiscaleMixer as MSPS_Mixer_wo_ds
+# from model.MSPS_Mixer_without_SE import MultiscaleMixer as MSPS_Mixer_wo_SE
+# from model.MSPS_Mixer_without_Shift import MultiscaleMixer as MSPS_Mixer_wo_Shift
+# from model.MSPS_Mixer_without_ds_Shift import MultiscaleMixer as MSPS_Mixer_wo_ds_Shift
+# from model.MSPS_Mixer_without_ds_SE import MultiscaleMixer as MSPS_Mixer_wo_ds_SE
+# from model.MSPS_Mixer_without_SE_Shift import MultiscaleMixer as MSPS_Mixer_wo_SE_Shift
+# from model.MSPS_Mixer_without_ds_Shift_SE import MultiscaleMixer as MSPS_Mixer_wo_ds_Shift_SE
 
-model = MSPS_Mixer(3, 128, 0.1, [2, 2], act='relu')
-print('MSPS Mixer 128 22 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 64)
+print('MSPS Mixer 64 22 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer(3, 128, 0.1, [2, 2, 2], act='relu')
-print('MSPS Mixer 128 222 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 64, 0.1, [2, 2, 2], act='relu')
+print('MSPS Mixer 64 222 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer(3, 128, 0.1, [2, 4, 2], act='relu')
-print('MSPS Mixer 128 242 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 64, 0.1, [2, 4, 2], act='relu')
+print('MSPS Mixer 64 242 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer(3, 768, 0.1, [2, 2], act='relu')
-print('MSPS Mixer 768 22 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 96, 0.1, [2, 2], act='relu')
+print('MSPS Mixer 96 22 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer(3, 768, 0.1, [2, 2, 2], act='relu')
-print('MSPS Mixer 768 222 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 96, 0.1, [2, 2, 2], act='relu')
+print('MSPS Mixer 96 222 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer(3, 768, 0.1, [2, 4, 2], act='relu')
-print('MSPS Mixer 768 242 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 96, 0.1, [2, 4, 2], act='relu')
+print('MSPS Mixer 96 242 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer_wo_ds(3, 128, 0.1, [2, 2], act='relu')
-print('MSPS Mixer without downsample Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 256, 0.1, [2, 2], act='relu')
+print('MSPS Mixer 256 22 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer_wo_SE(3, 128, 0.1, [2, 2], act='relu')
-print('MSPS Mixer without SE Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 256, 0.1, [2, 2, 2], act='relu')
+print('MSPS Mixer 256 222 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer_wo_Shift(3, 128, 0.1, [2, 2], act='relu')
-print('MSPS Mixer without Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 256, 0.1, [2, 4, 2], act='relu')
+print('MSPS Mixer 256 242 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer_wo_ds_Shift(3, 128, 0.1, [2, 2], act='relu')
-print('MSPS Mixer without downsample and Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 512, 0.1, [2, 2], act='relu')
+print('MSPS Mixer 512 22 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer_wo_ds_SE(3, 128, 0.1, [2, 2], act='relu')
-print('MSPS Mixer without downsample and SE Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 512, 0.1, [2, 2, 2], act='relu')
+print('MSPS Mixer 512 222 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer_wo_SE_Shift(3, 128, 0.1, [2, 2], act='relu')
-print('MSPS Mixer without SE and Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+model = MSPS_Mixer(3, 512, 0.1, [2, 4, 2], act='relu')
+print('MSPS Mixer 512 242 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-model = MSPS_Mixer_wo_ds_Shift_SE(3, 128, 0.1, [2, 2], act='relu')
-print('MSPS Mixer without downsample, SE and Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+# model = MSPS_Mixer(3, 128, 0.1, [2, 2], act='relu')
+# print('MSPS Mixer 128 22 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer(3, 128, 0.1, [2, 2, 2], act='relu')
+# print('MSPS Mixer 128 222 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer(3, 128, 0.1, [2, 4, 2], act='relu')
+# print('MSPS Mixer 128 242 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer(3, 768, 0.1, [2, 2], act='relu')
+# print('MSPS Mixer 768 22 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer(3, 768, 0.1, [2, 2, 2], act='relu')
+# print('MSPS Mixer 768 222 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer(3, 768, 0.1, [2, 4, 2], act='relu')
+# print('MSPS Mixer 768 242 Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer_wo_ds(3, 128, 0.1, [2, 2], act='relu')
+# print('MSPS Mixer without downsample Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer_wo_SE(3, 128, 0.1, [2, 2], act='relu')
+# print('MSPS Mixer without SE Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer_wo_Shift(3, 128, 0.1, [2, 2], act='relu')
+# print('MSPS Mixer without Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer_wo_ds_Shift(3, 128, 0.1, [2, 2], act='relu')
+# print('MSPS Mixer without downsample and Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer_wo_ds_SE(3, 128, 0.1, [2, 2], act='relu')
+# print('MSPS Mixer without downsample and SE Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer_wo_SE_Shift(3, 128, 0.1, [2, 2], act='relu')
+# print('MSPS Mixer without SE and Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+# model = MSPS_Mixer_wo_ds_Shift_SE(3, 128, 0.1, [2, 2], act='relu')
+# print('MSPS Mixer without downsample, SE and Shift Parameter Count:', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 # Shift 모델 기본 기준
 # Shift_768_2_8 = Shift.MultiscaleMixer(3, 768, 8, 0.1, patches=[(224, 2), (224, 4)], act='relu')

@@ -150,8 +150,8 @@ class Downsample(nn.Module):
                  in_channels:int):
         super().__init__()
 
-        self.norm = nn.LayerNorm(in_channels*2)
-        self.reduction = nn.Conv1d(in_channels*2,
+        self.norm = nn.LayerNorm(in_channels)
+        self.reduction = nn.Conv1d(in_channels,
                                    in_channels,
                                    kernel_size=1,
                                    stride=1,)
@@ -159,9 +159,9 @@ class Downsample(nn.Module):
     def forward(self, x):
         B, C, N = x.shape
 
-        x0 = x[:, :, 0::2]
-        x1 = x[:, :, 1::2]
-        x = torch.cat([x0, x1], dim=1)  # 채널 방향으로 concat
+        # x0 = x[:, :, 0::2]
+        # x1 = x[:, :, 1::2]
+        # x = torch.cat([x0, x1], dim=1)  # 채널 방향으로 concat
 
         x = x.permute(0, 2, 1)  # (B, N, C*2)
         x = self.norm(x)

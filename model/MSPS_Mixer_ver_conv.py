@@ -36,7 +36,7 @@ def shift_with_padding(x, shift, dim):
     return shifted
 
 def channel_shift(x, shift=[-1, 0, 1], shift_size=3):
-    B, D, N = x.shape
+    B, C, N = x.shape
     
     x_chunk = torch.chunk(x, shift_size, dim=1)
     shifted_chunks = []
@@ -75,7 +75,7 @@ class MlpBlock(nn.Module):
         super().__init__()
         
         self.mlp = nn.Sequential(
-            nn.Linear(in_features, out_features),
+            nn.Conv1d(in_features, out_features, kernel_size=1),
             get_activation(activation),
             nn.Dropout(dropout)
         )
@@ -100,48 +100,47 @@ class ShiftBlock(nn.Module):
         self.dropout = dropout
         self.act = act
 
-        self.channel_mixer_S = nn.Sequential(
-            nn.LayerNorm(patch_dim),
-            MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
-        )
+        self.norm = nn.LayerNorm(patch_dim)
+        self.channel_mixer_S = MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
         self.channel_projection = nn.Sequential(
             MlpBlock(num_patches, num_patches*2, self.act, self.dropout),
-            nn.Linear(num_patches*2, num_patches)
+            nn.Conv1d(num_patches*2, num_patches, kernel_size=1)
         )
         
         # SE Block
         self.squeeze = nn.AdaptiveAvgPool1d(1)
         self.excitation = nn.Sequential(
-            nn.Linear(num_patches, num_patches//8),
+            nn.Conv1d(num_patches, num_patches//8, kernel_size=1),
             get_activation(self.act),
-            nn.Linear(num_patches//8, num_patches),
+            nn.Conv1d(num_patches//8, num_patches, kernel_size=1),
             nn.Sigmoid()
         )
 
         self.channel_mixer_F = nn.Sequential(
             MlpBlock(patch_dim,  patch_dim*2, self.act, self.dropout),
-            nn.Linear(patch_dim*2, patch_dim),
+            nn.Conv1d(patch_dim*2, patch_dim, kernel_size=1),
             )
 
     def forward(self, x):
         B, N, C = x.shape
 
         res = x
-        x = self.channel_mixer_S(x)
+        x = self.norm(x)
+        x = einops.rearrange(x, 'b n c -> b c n')
+        x = self.channel_mixer_S(x) # (B, C, N)
+        x = einops.rearrange(x, 'b c n -> b n c')
 
         x_shift = channel_shift(x, shift=self.shift, shift_size=self.shift_size)
+        x_shift = self.channel_projection(x_shift) # (B, N, C)
 
-        x_shift = x_shift.permute(0, 2, 1)  # (B, C, N)
-        x_shift = self.channel_projection(x_shift)
-        x_shift = x_shift.permute(0, 2, 1)  # (B, N, C)
+        se = self.squeeze(x_shift) # (B, N, C) -> (B, N, 1)
+        ex = self.excitation(se) # (B, N, 1)
+        z = x_shift * ex # (B, N, 1) -> (B, N, C)
 
-        se = self.squeeze(x_shift)
-        se = se.squeeze()  # (B, N)
-        ex = self.excitation(se)
-        ex = ex.unsqueeze(-1)  # (B, N, 1)
-        z = x_shift * ex
-
-        z = self.channel_mixer_F(z) + res
+        z = einops.rearrange(z, 'b n c -> b c n')
+        z = self.channel_mixer_F(z)
+        z = einops.rearrange(z, 'b c n -> b n c')
+        z = z + res
 
         return z
 
@@ -163,9 +162,9 @@ class Downsample(nn.Module):
         x1 = x[:, :, 1::2]
         x = torch.cat([x0, x1], dim=1)  # 채널 방향으로 concat
 
-        x = x.permute(0, 2, 1)  # (B, N, C*2)
+        x = einops.rearrange(x, 'b c n -> b n c')
         x = self.norm(x)
-        x = x.permute(0, 2, 1)  # (B, C*2, N)
+        x = einops.rearrange(x, 'b n c -> b c n')
         x = self.reduction(x)
 
         return x
@@ -185,7 +184,6 @@ class BasicLayer(nn.Module):
 
         self.Shift = nn.ModuleList([
             nn.Sequential(
-                nn.LayerNorm(patch_dim),
                 ShiftBlock(patch_dim=patch_dim,
                         num_patches=num_patches,
                         shift=shift,
@@ -196,11 +194,14 @@ class BasicLayer(nn.Module):
             for _ in range(num_layers)
         ])
 
+        self.norm = nn.ModuleList([
+            nn.LayerNorm(num_patches)
+            for _ in range(num_layers)
+        ])
         self.TokenMixer = nn.ModuleList([
             nn.Sequential(
-                nn.LayerNorm(num_patches),
                 MlpBlock(num_patches, num_patches*2, act, dropout),
-                nn.Linear(num_patches*2, num_patches)
+                nn.Conv1d(num_patches*2, num_patches, kernel_size=1)
             )
             for _ in range(num_layers)
         ])
@@ -213,19 +214,22 @@ class BasicLayer(nn.Module):
     def forward(self, x):
         B, C, N = x.shape
         
-        results = []
-        for shift, token in zip(self.Shift, self.TokenMixer):
-            x = x.permute(0, 2, 1)  # (B, N, C)
+        for shift, norm, token in zip(self.Shift, self.norm, self.TokenMixer):
+            x = einops.rearrange(x, 'b c n -> b n c')
             x = shift(x)
 
-            x = x.permute(0, 2, 1)  # (B, C, N)
-            x = token(x) + x
-            results.append(x)
+            x = einops.rearrange(x, 'b n c -> b c n')
+            res = x
+            x = norm(x)
+            x = einops.rearrange(x, 'b c n -> b n c')
+            x = token(x)
+            x = einops.rearrange(x, 'b n c -> b c n')
+            x = x + res
         
         if self.downsample is not None:
             x = self.downsample(x)
-        
-        return x, results
+
+        return x
 
 # Multi-Scale Patch Shift Mixer Model
 class MultiscaleMixer(nn.Module):
@@ -300,10 +304,10 @@ class MultiscaleMixer(nn.Module):
             for x in self.num_patches
         ])
         
+        self.norm = nn.LayerNorm(patch_dim)
         self.head = nn.Sequential(
-            nn.LayerNorm(patch_dim),
-            nn.Linear(patch_dim, patch_dim//2),
-            nn.Linear(patch_dim//2, 6)
+            nn.Conv1d(patch_dim, patch_dim//2, kernel_size=1),
+            nn.Conv1d(patch_dim//2, 6, kernel_size=1)
         )
         
     def forward(self, x):
@@ -313,16 +317,13 @@ class MultiscaleMixer(nn.Module):
         for p_idx in range(len(self.patches)):
             # Patch Embedding
             z = self.patch_embedding[p_idx](x)
-            z = z.flatten(2) # (B, C, N)
+            z = einops.rearrange(z, 'b c h w -> b c (h w)')
 
             # Positional Embedding
             z = self.positional_embedding[p_idx](z)
 
-            layer_outputs = []
             for blk in self.blocks[p_idx]:
-                z, blk_layer = blk(z)
-
-                layer_outputs.extend(blk_layer)
+                z = blk(z)
             
             Mixer_output.append(z)
         
@@ -332,6 +333,9 @@ class MultiscaleMixer(nn.Module):
         # GAP
         x = torch.mean(z, dim=2, keepdim=False)
 
+        x = self.norm(x)
+        x = einops.rearrange(x, 'b c -> b c 1')
         logit = self.head(x)
+        logit = einops.rearrange(logit, 'b c 1 -> b c')
         
         return logit, Mixer_output

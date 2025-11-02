@@ -17,8 +17,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
 
-# from model.MSPS_Mixer import MultiscaleMixer
-from model.MSPS_Mixer_rev import MultiscaleMixer
+from model.MSPS_Mixer_ver_conv import MultiscaleMixer
 from utils.earlystopping import EarlyStopping
 from utils.logger import create_logger
 

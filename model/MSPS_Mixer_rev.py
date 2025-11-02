@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import einops
 
 # Select Activation Function
 def get_activation(activation):
@@ -150,22 +149,18 @@ class Downsample(nn.Module):
                  in_channels:int):
         super().__init__()
 
-        self.norm = nn.LayerNorm(in_channels*2)
-        self.reduction = nn.Conv1d(in_channels*2,
+        self.norm = nn.LayerNorm(in_channels)
+        self.reduction = nn.Conv1d(in_channels,
                                    in_channels,
-                                   kernel_size=1,
-                                   stride=1,)
+                                   kernel_size=2,
+                                   stride=2,)
 
     def forward(self, x):
         B, C, N = x.shape
 
-        x0 = x[:, :, 0::2]
-        x1 = x[:, :, 1::2]
-        x = torch.cat([x0, x1], dim=1)  # 채널 방향으로 concat
-
-        x = x.permute(0, 2, 1)  # (B, N, C*2)
+        x = x.permute(0, 2, 1)  # (B, N, C)
         x = self.norm(x)
-        x = x.permute(0, 2, 1)  # (B, C*2, N)
+        x = x.permute(0, 2, 1)  # (B, C, N)
         x = self.reduction(x)
 
         return x
@@ -313,7 +308,7 @@ class MultiscaleMixer(nn.Module):
         for p_idx in range(len(self.patches)):
             # Patch Embedding
             z = self.patch_embedding[p_idx](x)
-            z = z.flatten(2) # (B, C, N)
+            z = z.flatten(2)  # (B, C, N)
 
             # Positional Embedding
             z = self.positional_embedding[p_idx](z)
