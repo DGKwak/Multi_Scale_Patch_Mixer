@@ -17,10 +17,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
 
-from model.MSPS_Mixer import MultiscaleMixer
-# from model.MSPS_Mixer_RMS import MultiscaleMixer
-# from model.MSPS_Mixer_rev01 import MultiscaleMixer
-# from model.MSPS_Mixer_rev_RMS import MultiscaleMixer
+# from model.MSPS_Mixer import MultiscaleMixer
+from model.MSPS_Mixer_for_quant import MultiscaleMixer
 from utils.earlystopping import EarlyStopping
 from utils.logger import create_logger
 
@@ -101,19 +99,13 @@ def train(model,
         x, y = x.to(device), y.to(device)
 
         optimizer.zero_grad()
-        logit, z = model(x)
+        logit = model(x)
 
         ce_loss = cross_entropy(logit, y)
         aux_loss = 0
 
-        for out in z:
-            if out.ndim > 2:
-                out = torch.mean(out, dim=2, keepdim=False)
-            
-            aux_loss += cross_entropy(out, y)
 
-        if len(z) == 1:
-            aux_loss = 0
+        aux_loss = 0
 
         loss = ce_loss + lambda_aux * aux_loss
         loss.backward()
@@ -142,21 +134,14 @@ def evaluate(model,
             
             x, y = x.to(device), y.to(device)
 
-            logit, z = model(x)
+            logit = model(x)
 
             correct += (logit.argmax(1) == y).sum().item()
 
             ce_loss = cross_entropy(logit, y)
             aux_loss = 0
 
-            for out in z:
-                if out.ndim > 2:
-                    out = torch.mean(out, dim=2, keepdim=False)
-            
-                aux_loss += cross_entropy(out, y)
-
-            if len(z) == 1:
-                aux_loss = 0
+            aux_loss = 0
 
             loss = ce_loss + lambda_aux * aux_loss
 
@@ -184,7 +169,7 @@ def test(model,
             
             x, y = x.to(device), y.to(device)
             
-            logits, z = model(x)
+            logits = model(x)
             predictions = logits.argmax(1)
             
             all_predictions.extend(predictions.cpu().numpy())
@@ -217,7 +202,7 @@ def plot_confusion_matrix(y_true, y_pred, class_names, experiment_name, save_pat
     
     return cm_path
 
-@hydra.main(config_path='./config', config_name='config_STFT', version_base=None)
+@hydra.main(config_path='./config', config_name='MSPS_Mixer', version_base=None)
 def main(cfg):
     metadata = {
         'Experiment Name': cfg.experiment_name,

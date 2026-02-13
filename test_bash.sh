@@ -1,15 +1,44 @@
 #!/bin/bash
 
+# MSPS_Mixer_KD03 test
+uv run MSPS_Mixer_main_KD03.py experiment_name="MSPS_Mixer_KD03_PSplit_temp6" temperature=6
+
+# MSPS_Mixer_rev02 test
+# uv run MSPS_Mixer_rev02_main.py experiment_name="MSPS_Mixer_rev02_128_22_labelsmoothing_02"
+
+# KD test
+# uv run MSPS_Mixer_main_KD.py experiment_name="MSPS_Mixer_KD_temp4_lambda4" temperature=4 lambda_aux=0.5
+# uv run MSPS_Mixer_main_KD02.py
+# uv run MSPS_Mixer_main_KD.py experiment_name="MSPS_Mixer_KD_temp6_lambda3" temperature=6 lambda_aux=0.3
+# uv run MSPS_Mixer_main_KD.py experiment_name="MSPS_Mixer_KD_temp5_lambda3" temperature=5 lambda_aux=0.3
+# uv run MSPS_Mixer_main_KD.py experiment_name="MSPS_Mixer_KD_temp3_lambda3" temperature=3 lambda_aux=0.3
+# uv run MSPS_Mixer_main_KD02.py experiment_name="MSPS_Mixer_KD02_temp5_lambda3" temperature=5 lambda_kl=0.3 lambda_mse=0.3
+# uv run MSPS_Mixer_main_KD02.py experiment_name="MSPS_Mixer_KD02_temp5_kl3_ms2" temperature=5 lambda_kl=0.3 lambda_mse=0.2
+
+# input 3x96x9667tyuhgr8fijdcbvkxmn ,
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_rev_dim_96_input_96_96" model.patches=[[96,2],[96,4]] model.num_patches=[48,24] model.stride=[[96,2],[96,4]] model.patch_dim=96
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_rev_input_96_96" model.patches=[[96,2],[96,4]] model.num_patches=[48,24] model.stride=[[96,2],[96,4]]
+
+# MSPS Mixer shift test
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_shift_2-11-2" model.shift=[2,-1,1,-2]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_shift_3-11-3" model.shift=[3,-1,1,-3]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_shift_4-11-4" model.shift=[4,-1,1,-4]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_shift_-101" model.shift=[-1,0,1] model.shift_size=3
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_shift_-202" model.shift=[-2,0,2] model.shift_size=3
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_shift_-303" model.shift=[-3,0,3] model.shift_size=3
+
+# uv run MSPS_Mixer_main_roll.py experiment_name="MSPS_Mixer_roll"
+
 # MSPS Mixer ver conv test
 # uv run MSPS_Mixer_ver_conv_main.py experiment_name="MSPS_Mixer_ver_conv_128_22"
 
 # uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_rev_ds"
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_16" model.patches='[[16, 16]]' model.stride='[[16, 16]]' model.num_patches=[196]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_1" model.patches='[[224, 1]]' model.stride='[[224, 1]]' model.num_patches=[224]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_2" model.patches='[[224, 2]]' model.stride='[[224, 2]]' model.num_patches=[112]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_4" model.patches='[[224, 4]]' model.stride='[[224, 4]]' model.num_patches=[56]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_1_2" model.patches='[[224, 1], [224, 2]]' model.stride='[[224, 1], [224, 2]]' model.num_patches=[224,112]
-uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_1_4" model.patches='[[224, 1], [224, 4]]' model.stride='[[224, 1], [224, 4]]' model.num_patches=[224,56]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_16" model.patches='[[16, 16]]' model.stride='[[16, 16]]' model.num_patches=[196]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_1" model.patches='[[224, 1]]' model.stride='[[224, 1]]' model.num_patches=[224]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_2" model.patches='[[224, 2]]' model.stride='[[224, 2]]' model.num_patches=[112]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_4" model.patches='[[224, 4]]' model.stride='[[224, 4]]' model.num_patches=[56]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_1_2" model.patches='[[224, 1], [224, 2]]' model.stride='[[224, 1], [224, 2]]' model.num_patches=[224,112]
+# uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_patch_224_1_4" model.patches='[[224, 1], [224, 4]]' model.stride='[[224, 1], [224, 4]]' model.num_patches=[224,56]
 
 # MSPS_Mixer
 # uv run MSPS_Mixer_main.py experiment_name="MSPS_Mixer_128_22"

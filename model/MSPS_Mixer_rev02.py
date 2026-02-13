@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import einops
 
 # Select Activation Function
 def get_activation(activation):
@@ -134,10 +135,10 @@ class ShiftBlock(nn.Module):
         x_shift = self.channel_projection(x_shift)
         x_shift = x_shift.permute(0, 2, 1)  # (B, N, C)
 
-        se = self.squeeze(x_shift)  # (B, N, 1)
-        se = se.permute(0, 2, 1)  # (B, 1, N)
+        se = self.squeeze(x_shift)
+        se = se.squeeze()  # (B, N)
         ex = self.excitation(se)
-        ex = ex.permute(0, 2, 1)  # (B, N, 1)
+        ex = ex.unsqueeze(-1)  # (B, N, 1)
         z = x_shift * ex
 
         z = self.channel_mixer_F(z) + res
@@ -149,18 +150,22 @@ class Downsample(nn.Module):
                  in_channels:int):
         super().__init__()
 
-        self.norm = nn.LayerNorm(in_channels)
-        self.reduction = nn.Conv1d(in_channels,
+        self.norm = nn.LayerNorm(in_channels*2)
+        self.reduction = nn.Conv1d(in_channels*2,
                                    in_channels,
-                                   kernel_size=2,
-                                   stride=2,)
+                                   kernel_size=1,
+                                   stride=1,)
 
     def forward(self, x):
         B, C, N = x.shape
 
-        x = x.permute(0, 2, 1)  # (B, N, C)
+        x0 = x[:, :, 0::2]
+        x1 = x[:, :, 1::2]
+        x = torch.cat([x0, x1], dim=1)  # 채널 방향으로 concat
+
+        x = x.permute(0, 2, 1)  # (B, N, C*2)
         x = self.norm(x)
-        x = x.permute(0, 2, 1)  # (B, C, N)
+        x = x.permute(0, 2, 1)  # (B, C*2, N)
         x = self.reduction(x)
 
         return x
@@ -266,6 +271,8 @@ class MultiscaleMixer(nn.Module):
         self.shift = shift
         self.act = act
         self.num_patches = num_patches
+
+        self.Mixer_output = []
         
         self.patch_embedding = nn.ModuleList([
             nn.Conv2d(in_channels=self.in_channels,
@@ -300,15 +307,22 @@ class MultiscaleMixer(nn.Module):
             nn.Linear(patch_dim, patch_dim//2),
             nn.Linear(patch_dim//2, 6)
         )
-        
+
+    def get_Mixer_outputs(self):
+        for idx in range(len(self.Mixer_output)):
+            x = torch.mean(self.Mixer_output[idx], dim=2, keepdim=False)
+            self.Mixer_output[idx] = self.head(x)
+
+        return self.Mixer_output
+
     def forward(self, x):
-        Mixer_output = []
-        
+        self.Mixer_output = []
+
         # Apply Multi-Scale Patch
         for p_idx in range(len(self.patches)):
             # Patch Embedding
             z = self.patch_embedding[p_idx](x)
-            z = z.flatten(2)  # (B, C, N)
+            z = z.flatten(2) # (B, C, N)
 
             # Positional Embedding
             z = self.positional_embedding[p_idx](z)
@@ -319,14 +333,14 @@ class MultiscaleMixer(nn.Module):
 
                 layer_outputs.extend(blk_layer)
             
-            Mixer_output.append(z)
+            self.Mixer_output.append(z)
         
         # Concatenate Multi-Scale Patch
-        z = torch.cat(Mixer_output, dim=2)  # (B, C, N1+N2)
+        z = torch.cat(self.Mixer_output, dim=2)  # (B, C, N1+N2)
 
         # GAP
         x = torch.mean(z, dim=2, keepdim=False)
 
         logit = self.head(x)
         
-        return logit, Mixer_output
+        return logit

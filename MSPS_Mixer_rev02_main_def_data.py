@@ -9,6 +9,7 @@ import numpy as np
 from tqdm import tqdm
 import torch
 import torch.nn as nn
+import torchvision
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import CosineAnnealingLR, ExponentialLR
@@ -17,12 +18,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
 
-from model.MSPS_Mixer import MultiscaleMixer
-# from model.MSPS_Mixer_RMS import MultiscaleMixer
-# from model.MSPS_Mixer_rev01 import MultiscaleMixer
-# from model.MSPS_Mixer_rev_RMS import MultiscaleMixer
+from model.MSPS_Mixer_rev02 import MultiscaleMixer
 from utils.earlystopping import EarlyStopping
 from utils.logger import create_logger
+from loss.loss_func import FocalLoss
 
 def make_datasets(tr_transform,
                   v_transform,
@@ -86,6 +85,7 @@ def train(model,
           loader, 
           optimizer, 
           cross_entropy,
+          focal,
           lambda_aux,
           device, 
           scheduler):
@@ -101,19 +101,18 @@ def train(model,
         x, y = x.to(device), y.to(device)
 
         optimizer.zero_grad()
-        logit, z = model(x)
+        logit = model(x)
 
-        ce_loss = cross_entropy(logit, y)
+        ce_loss = focal(logit, y)
         aux_loss = 0
 
-        for out in z:
-            if out.ndim > 2:
-                out = torch.mean(out, dim=2, keepdim=False)
-            
-            aux_loss += cross_entropy(out, y)
+        z = model.get_Mixer_outputs()
 
         if len(z) == 1:
             aux_loss = 0
+        else:
+            for out in z:
+                aux_loss += cross_entropy(out, y)
 
         loss = ce_loss + lambda_aux * aux_loss
         loss.backward()
@@ -128,6 +127,7 @@ def train(model,
 def evaluate(model, 
              loader, 
              cross_entropy,
+             focal,
              lambda_aux, 
              device):
     model.eval()
@@ -142,21 +142,20 @@ def evaluate(model,
             
             x, y = x.to(device), y.to(device)
 
-            logit, z = model(x)
+            logit = model(x)
 
             correct += (logit.argmax(1) == y).sum().item()
 
-            ce_loss = cross_entropy(logit, y)
+            ce_loss = focal(logit, y)
             aux_loss = 0
 
-            for out in z:
-                if out.ndim > 2:
-                    out = torch.mean(out, dim=2, keepdim=False)
-            
-                aux_loss += cross_entropy(out, y)
+            z = model.get_Mixer_outputs()
 
             if len(z) == 1:
                 aux_loss = 0
+            else:
+                for out in z:
+                    aux_loss += cross_entropy(out, y)
 
             loss = ce_loss + lambda_aux * aux_loss
 
@@ -184,7 +183,7 @@ def test(model,
             
             x, y = x.to(device), y.to(device)
             
-            logits, z = model(x)
+            logits = model(x)
             predictions = logits.argmax(1)
             
             all_predictions.extend(predictions.cpu().numpy())
@@ -217,7 +216,7 @@ def plot_confusion_matrix(y_true, y_pred, class_names, experiment_name, save_pat
     
     return cm_path
 
-@hydra.main(config_path='./config', config_name='config_STFT', version_base=None)
+@hydra.main(config_path='./config', config_name='MSPS_STFT_01', version_base=None)
 def main(cfg):
     metadata = {
         'Experiment Name': cfg.experiment_name,
@@ -281,7 +280,10 @@ def main(cfg):
     ).to(device)
 
     # loss Function
-    cross_entropy = nn.CrossEntropyLoss()
+    cross_entropy = nn.CrossEntropyLoss(label_smoothing=0.1)
+    focal = FocalLoss(alpha=torch.tensor([1.75, 1.0, 1.75, 1.0, 1.0, 1.0]), 
+                      task_type='multi-class', 
+                      num_classes=6).to(device)
 
     # Optimizer & Scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
@@ -306,6 +308,7 @@ def main(cfg):
                                       train_loader,
                                       optimizer,
                                       cross_entropy,
+                                      focal,
                                       cfg.lambda_aux,
                                       device,
                                       scheduler)
@@ -313,6 +316,7 @@ def main(cfg):
         val_loss, val_acc = evaluate(model,
                                      val_loader,
                                      cross_entropy,
+                                     focal,
                                      cfg.lambda_aux,
                                      device)
         

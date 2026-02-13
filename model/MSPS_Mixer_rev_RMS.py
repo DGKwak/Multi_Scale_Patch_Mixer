@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -48,6 +49,55 @@ def channel_shift(x, shift=[-1, 0, 1], shift_size=3):
     x_shifted = torch.cat(shifted_chunks, dim=1)
 
     return x_shifted
+
+class MyRMSNorm(nn.Module):
+    def __init__(self, normalized_shape, p=-1., eps=1e-8, bias=False):
+        """
+            Root Mean Square Layer Normalization
+        :param normalized_shape: input shape from an expected input of size
+            (.., normalized_shape[0], normalized_shape[1], ..., normalized_shape[-1])
+        :param p: partial RMSNorm, valid value [0, 1], default -1.0 (disabled)
+        :param eps:  epsilon value, default 1e-8
+        :param bias: whether use bias term for RMSNorm, disabled by
+            default because RMSNorm doesn't enforce re-centering invariance.
+        """
+        super().__init__()
+
+        self.eps = eps
+        self.normalized_shape = normalized_shape
+        self.p = p
+        self.bias = bias
+
+        self.scale = nn.Parameter(torch.ones(self.normalized_shape))
+        self.register_parameter("scale", self.scale)
+
+        self.D = np.prod(normalized_shape)
+
+        self.norm_dims = tuple(range(-len(normalized_shape), 0))
+
+        if self.bias:
+            self.offset = nn.Parameter(torch.zeros(self.normalized_shape))
+            self.register_parameter("offset", self.offset)
+
+    def _l2norm(self, x):
+        sum_of_squares = x.pow(2).sum(dim=self.norm_dims, keepdim=True)
+        result = torch.sqrt(sum_of_squares)
+        return result
+
+    def forward(self, x):
+        l2_norm = self._l2norm(x)
+
+        D_sqrt_inv = torch.tensor(self.D ** (-0.5), dtype=x.dtype, device=x.device)
+        rms_x = l2_norm * D_sqrt_inv
+        
+        # 3. 정규화: x / (rms_x + eps)
+        x_normed = x / (rms_x + self.eps)
+        
+        # 4. 스케일링 및 오프셋 적용
+        if self.bias:
+            return self.scale * x_normed + self.offset
+        
+        return self.scale * x_normed
 
 class PositionalEmbedding(nn.Module):
     def __init__(self, d_feature, max_len):
@@ -100,7 +150,7 @@ class ShiftBlock(nn.Module):
         self.act = act
 
         self.channel_mixer_S = nn.Sequential(
-            nn.LayerNorm(patch_dim),
+            MyRMSNorm((num_patches, patch_dim)),
             MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
         )
         self.channel_projection = nn.Sequential(
@@ -134,22 +184,23 @@ class ShiftBlock(nn.Module):
         x_shift = self.channel_projection(x_shift)
         x_shift = x_shift.permute(0, 2, 1)  # (B, N, C)
 
-        se = self.squeeze(x_shift)  # (B, N, 1)
+        se = torch.mean(x_shift, dim=2, keepdim=True)  # (B, N, 1)
         se = se.permute(0, 2, 1)  # (B, 1, N)
         ex = self.excitation(se)
         ex = ex.permute(0, 2, 1)  # (B, N, 1)
         z = x_shift * ex
 
-        z = self.channel_mixer_F(z) + res
+        z = self.channel_mixer_F(x_shift) + res
 
         return z
 
 class Downsample(nn.Module):
     def __init__(self,
-                 in_channels:int):
+                 in_channels:int,
+                 norm:int):
         super().__init__()
 
-        self.norm = nn.LayerNorm(in_channels)
+        self.norm = MyRMSNorm((in_channels, norm))
         self.reduction = nn.Conv1d(in_channels,
                                    in_channels,
                                    kernel_size=2,
@@ -158,9 +209,7 @@ class Downsample(nn.Module):
     def forward(self, x):
         B, C, N = x.shape
 
-        x = x.permute(0, 2, 1)  # (B, N, C)
         x = self.norm(x)
-        x = x.permute(0, 2, 1)  # (B, C, N)
         x = self.reduction(x)
 
         return x
@@ -180,7 +229,7 @@ class BasicLayer(nn.Module):
 
         self.Shift = nn.ModuleList([
             nn.Sequential(
-                nn.LayerNorm(patch_dim),
+                MyRMSNorm((num_patches, patch_dim)),
                 ShiftBlock(patch_dim=patch_dim,
                         num_patches=num_patches,
                         shift=shift,
@@ -193,7 +242,7 @@ class BasicLayer(nn.Module):
 
         self.TokenMixer = nn.ModuleList([
             nn.Sequential(
-                nn.LayerNorm(num_patches),
+                MyRMSNorm((patch_dim, num_patches)),
                 MlpBlock(num_patches, num_patches*2, act, dropout),
                 nn.Linear(num_patches*2, num_patches)
             )
@@ -201,7 +250,7 @@ class BasicLayer(nn.Module):
         ])
 
         if downsample:
-            self.downsample = Downsample(in_channels=patch_dim)
+            self.downsample = Downsample(in_channels=patch_dim, norm=num_patches)
         else:
             self.downsample = None
     
@@ -296,7 +345,6 @@ class MultiscaleMixer(nn.Module):
         ])
         
         self.head = nn.Sequential(
-            nn.LayerNorm(patch_dim),
             nn.Linear(patch_dim, patch_dim//2),
             nn.Linear(patch_dim//2, 6)
         )
@@ -308,7 +356,7 @@ class MultiscaleMixer(nn.Module):
         for p_idx in range(len(self.patches)):
             # Patch Embedding
             z = self.patch_embedding[p_idx](x)
-            z = z.flatten(2)  # (B, C, N)
+            z = z.view(z.size(0), z.size(1), -1)  # (B, C, N)
 
             # Positional Embedding
             z = self.positional_embedding[p_idx](z)

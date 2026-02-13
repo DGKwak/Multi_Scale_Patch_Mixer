@@ -100,7 +100,7 @@ class ShiftBlock(nn.Module):
         self.act = act
 
         self.channel_mixer_S = nn.Sequential(
-            nn.LayerNorm(patch_dim),
+            nn.BatchNorm1d(num_patches),
             MlpBlock(patch_dim, patch_dim, self.act, self.dropout)
         )
         self.channel_projection = nn.Sequential(
@@ -108,8 +108,7 @@ class ShiftBlock(nn.Module):
             nn.Linear(num_patches*2, num_patches)
         )
         
-        # SE Block
-        self.squeeze = nn.AdaptiveAvgPool1d(1)
+        # SE Block2
         self.excitation = nn.Sequential(
             nn.Linear(num_patches, num_patches//8),
             get_activation(self.act),
@@ -134,22 +133,23 @@ class ShiftBlock(nn.Module):
         x_shift = self.channel_projection(x_shift)
         x_shift = x_shift.permute(0, 2, 1)  # (B, N, C)
 
-        se = self.squeeze(x_shift)  # (B, N, 1)
+        se = torch.mean(x_shift, dim=2, keepdim=True)  # (B, N, 1)
         se = se.permute(0, 2, 1)  # (B, 1, N)
         ex = self.excitation(se)
         ex = ex.permute(0, 2, 1)  # (B, N, 1)
         z = x_shift * ex
 
-        z = self.channel_mixer_F(z) + res
+        z = self.channel_mixer_F(x_shift) + res
 
         return z
 
 class Downsample(nn.Module):
     def __init__(self,
-                 in_channels:int):
+                 in_channels:int,
+                 norm:int):
         super().__init__()
 
-        self.norm = nn.LayerNorm(in_channels)
+        self.norm = nn.BatchNorm1d(norm)
         self.reduction = nn.Conv1d(in_channels,
                                    in_channels,
                                    kernel_size=2,
@@ -180,7 +180,7 @@ class BasicLayer(nn.Module):
 
         self.Shift = nn.ModuleList([
             nn.Sequential(
-                nn.LayerNorm(patch_dim),
+                nn.BatchNorm1d(num_patches),
                 ShiftBlock(patch_dim=patch_dim,
                         num_patches=num_patches,
                         shift=shift,
@@ -193,7 +193,7 @@ class BasicLayer(nn.Module):
 
         self.TokenMixer = nn.ModuleList([
             nn.Sequential(
-                nn.LayerNorm(num_patches),
+                nn.BatchNorm1d(patch_dim),
                 MlpBlock(num_patches, num_patches*2, act, dropout),
                 nn.Linear(num_patches*2, num_patches)
             )
@@ -201,7 +201,7 @@ class BasicLayer(nn.Module):
         ])
 
         if downsample:
-            self.downsample = Downsample(in_channels=patch_dim)
+            self.downsample = Downsample(in_channels=patch_dim, norm=num_patches)
         else:
             self.downsample = None
     
@@ -266,6 +266,9 @@ class MultiscaleMixer(nn.Module):
         self.shift = shift
         self.act = act
         self.num_patches = num_patches
+
+        self.Mixer_output = []
+        self.ds_outputs = []
         
         self.patch_embedding = nn.ModuleList([
             nn.Conv2d(in_channels=self.in_channels,
@@ -296,37 +299,50 @@ class MultiscaleMixer(nn.Module):
         ])
         
         self.head = nn.Sequential(
-            nn.LayerNorm(patch_dim),
             nn.Linear(patch_dim, patch_dim//2),
             nn.Linear(patch_dim//2, 6)
         )
-        
+    
+    def get_Mixer_outputs(self):
+        for idx in range(len(self.Mixer_output)):
+            x = torch.mean(self.Mixer_output[idx], dim=2, keepdim=False)
+            self.Mixer_output[idx] = self.head(x)
+
+        return self.Mixer_output
+    
+    def get_ds_outputs(self):
+        return self.ds_outputs
+
     def forward(self, x):
-        Mixer_output = []
+        self.Mixer_output = []
+        self.ds_outputs = []
         
         # Apply Multi-Scale Patch
         for p_idx in range(len(self.patches)):
             # Patch Embedding
             z = self.patch_embedding[p_idx](x)
-            z = z.flatten(2)  # (B, C, N)
+            z = z.view(z.size(0), z.size(1), -1)  # (B, C, N)
 
             # Positional Embedding
             z = self.positional_embedding[p_idx](z)
 
             layer_outputs = []
-            for blk in self.blocks[p_idx]:
+            for cnt, blk in enumerate(self.blocks[p_idx]):
                 z, blk_layer = blk(z)
 
                 layer_outputs.extend(blk_layer)
+
+                if cnt == 1:
+                    self.ds_outputs.append(z)
             
-            Mixer_output.append(z)
+            self.Mixer_output.append(z)
         
         # Concatenate Multi-Scale Patch
-        z = torch.cat(Mixer_output, dim=2)  # (B, C, N1+N2)
+        z = torch.cat(self.Mixer_output, dim=2)  # (B, C, N1+N2)
 
         # GAP
         x = torch.mean(z, dim=2, keepdim=False)
 
         logit = self.head(x)
         
-        return logit, Mixer_output
+        return logit

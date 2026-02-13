@@ -17,10 +17,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
 
-from model.MSPS_Mixer import MultiscaleMixer
-# from model.MSPS_Mixer_RMS import MultiscaleMixer
-# from model.MSPS_Mixer_rev01 import MultiscaleMixer
-# from model.MSPS_Mixer_rev_RMS import MultiscaleMixer
+from model.MSPS_Mixer_roll import MultiscaleMixer
 from utils.earlystopping import EarlyStopping
 from utils.logger import create_logger
 
@@ -217,7 +214,7 @@ def plot_confusion_matrix(y_true, y_pred, class_names, experiment_name, save_pat
     
     return cm_path
 
-@hydra.main(config_path='./config', config_name='config_STFT', version_base=None)
+@hydra.main(config_path='./config', config_name='MSPS_Mixer', version_base=None)
 def main(cfg):
     metadata = {
         'Experiment Name': cfg.experiment_name,

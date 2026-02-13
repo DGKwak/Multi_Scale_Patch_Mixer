@@ -1,0 +1,413 @@
+=== Quantized Model ===
+QuantizedMultiscaleMixer(
+  (quant): Quantize(scale=tensor([0.0374]), zero_point=tensor([57]), dtype=torch.quint8)
+  (dequant): DeQuantize()
+  (model_fp32): MultiscaleMixer(
+    (patch_embedding): ModuleList(
+      (0): QuantizedConv2d(3, 128, kernel_size=(224, 2), stride=(224, 2), scale=0.45558977127075195, zero_point=56)
+      (1): QuantizedConv2d(3, 128, kernel_size=(224, 4), stride=(224, 4), scale=0.7481527328491211, zero_point=73)
+    )
+    (blocks): ModuleList(
+      (0): ModuleList(
+        (0): BasicLayer(
+          (Shift): ModuleList(
+            (0): Sequential(
+              (0): BatchNorm1d(112, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): ShiftBlock(
+                (channel_mixer_S): Sequential(
+                  (0): BatchNorm1d(112, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                  (1): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=128, scale=0.027498729526996613, zero_point=48, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                )
+                (channel_projection): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=112, out_features=224, scale=0.03413744643330574, zero_point=62, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=224, out_features=112, scale=0.02499415911734104, zero_point=66, qscheme=torch.per_channel_affine)
+                )
+                (squeeze): AdaptiveAvgPool1d(output_size=1)
+                (excitation): Sequential(
+                  (0): QuantizedLinear(in_features=112, out_features=14, scale=0.0030829699244350195, zero_point=27, qscheme=torch.per_channel_affine)
+                  (1): ReLU()
+                  (2): QuantizedLinear(in_features=14, out_features=112, scale=0.005216360092163086, zero_point=64, qscheme=torch.per_channel_affine)
+                  (3): Sigmoid()
+                )
+                (channel_mixer_F): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=256, scale=0.007719166111201048, zero_point=59, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=256, out_features=128, scale=0.006291025318205357, zero_point=65, qscheme=torch.per_channel_affine)
+                )
+              )
+            )
+            (1): Sequential(
+              (0): BatchNorm1d(112, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): ShiftBlock(
+                (channel_mixer_S): Sequential(
+                  (0): BatchNorm1d(112, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                  (1): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=128, scale=0.03161970525979996, zero_point=52, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                )
+                (channel_projection): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=112, out_features=224, scale=0.021453669294714928, zero_point=55, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=224, out_features=112, scale=0.013054355047643185, zero_point=63, qscheme=torch.per_channel_affine)
+                )
+                (squeeze): AdaptiveAvgPool1d(output_size=1)
+                (excitation): Sequential(
+                  (0): QuantizedLinear(in_features=112, out_features=14, scale=0.0012648875126615167, zero_point=36, qscheme=torch.per_channel_affine)
+                  (1): ReLU()
+                  (2): QuantizedLinear(in_features=14, out_features=112, scale=0.003559044562280178, zero_point=66, qscheme=torch.per_channel_affine)
+                  (3): Sigmoid()
+                )
+                (channel_mixer_F): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=256, scale=0.00473432382568717, zero_point=58, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=256, out_features=128, scale=0.0033482119906693697, zero_point=65, qscheme=torch.per_channel_affine)
+                )
+              )
+            )
+          )
+          (TokenMixer): ModuleList(
+            (0): Sequential(
+              (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): MlpBlock(
+                (linear): QuantizedLinear(in_features=112, out_features=224, scale=0.06577648222446442, zero_point=64, qscheme=torch.per_channel_affine)
+                (act): ReLU()
+                (dropout): QuantizedDropout(p=0.1, inplace=False)
+              )
+              (2): QuantizedLinear(in_features=224, out_features=112, scale=0.06828763335943222, zero_point=52, qscheme=torch.per_channel_affine)
+            )
+            (1): Sequential(
+              (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): MlpBlock(
+                (linear): QuantizedLinear(in_features=112, out_features=224, scale=0.1365174949169159, zero_point=57, qscheme=torch.per_channel_affine)
+                (act): ReLU()
+                (dropout): QuantizedDropout(p=0.1, inplace=False)
+              )
+              (2): QuantizedLinear(in_features=224, out_features=112, scale=0.20745150744915009, zero_point=50, qscheme=torch.per_channel_affine)
+            )
+          )
+          (downsample): Downsample(
+            (norm): BatchNorm1d(112, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (reduction): QuantizedConv1d(128, 128, kernel_size=(2,), stride=(2,), scale=0.08279687911272049, zero_point=65)
+          )
+        )
+        (1): BasicLayer(
+          (Shift): ModuleList(
+            (0): Sequential(
+              (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): ShiftBlock(
+                (channel_mixer_S): Sequential(
+                  (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                  (1): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=128, scale=0.0373796783387661, zero_point=63, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                )
+                (channel_projection): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=56, out_features=112, scale=0.022470200434327126, zero_point=51, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=112, out_features=56, scale=0.013019746169447899, zero_point=70, qscheme=torch.per_channel_affine)
+                )
+                (squeeze): AdaptiveAvgPool1d(output_size=1)
+                (excitation): Sequential(
+                  (0): QuantizedLinear(in_features=56, out_features=7, scale=0.0007507301052100956, zero_point=76, qscheme=torch.per_channel_affine)
+                  (1): ReLU()
+                  (2): QuantizedLinear(in_features=7, out_features=56, scale=0.004912222735583782, zero_point=65, qscheme=torch.per_channel_affine)
+                  (3): Sigmoid()
+                )
+                (channel_mixer_F): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=256, scale=0.0055359057150781155, zero_point=59, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=256, out_features=128, scale=0.003441041801124811, zero_point=60, qscheme=torch.per_channel_affine)
+                )
+              )
+            )
+            (1): Sequential(
+              (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): ShiftBlock(
+                (channel_mixer_S): Sequential(
+                  (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                  (1): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=128, scale=0.03655253350734711, zero_point=56, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                )
+                (channel_projection): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=56, out_features=112, scale=0.015537901781499386, zero_point=51, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=112, out_features=56, scale=0.007789760362356901, zero_point=54, qscheme=torch.per_channel_affine)
+                )
+                (squeeze): AdaptiveAvgPool1d(output_size=1)
+                (excitation): Sequential(
+                  (0): QuantizedLinear(in_features=56, out_features=7, scale=0.000725574151147157, zero_point=58, qscheme=torch.per_channel_affine)
+                  (1): ReLU()
+                  (2): QuantizedLinear(in_features=7, out_features=56, scale=0.00416311901062727, zero_point=59, qscheme=torch.per_channel_affine)
+                  (3): Sigmoid()
+                )
+                (channel_mixer_F): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=256, scale=0.002536765532568097, zero_point=50, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=256, out_features=128, scale=0.002627227222546935, zero_point=58, qscheme=torch.per_channel_affine)
+                )
+              )
+            )
+          )
+          (TokenMixer): ModuleList(
+            (0): Sequential(
+              (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): MlpBlock(
+                (linear): QuantizedLinear(in_features=56, out_features=112, scale=0.13690754771232605, zero_point=63, qscheme=torch.per_channel_affine)
+                (act): ReLU()
+                (dropout): QuantizedDropout(p=0.1, inplace=False)
+              )
+              (2): QuantizedLinear(in_features=112, out_features=56, scale=0.15090948343276978, zero_point=51, qscheme=torch.per_channel_affine)
+            )
+            (1): Sequential(
+              (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): MlpBlock(
+                (linear): QuantizedLinear(in_features=56, out_features=112, scale=0.16818106174468994, zero_point=62, qscheme=torch.per_channel_affine)
+                (act): ReLU()
+                (dropout): QuantizedDropout(p=0.1, inplace=False)
+              )
+              (2): QuantizedLinear(in_features=112, out_features=56, scale=0.2278115302324295, zero_point=44, qscheme=torch.per_channel_affine)
+            )
+          )
+        )
+      )
+      (1): ModuleList(
+        (0): BasicLayer(
+          (Shift): ModuleList(
+            (0): Sequential(
+              (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): ShiftBlock(
+                (channel_mixer_S): Sequential(
+                  (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                  (1): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=128, scale=0.021390415728092194, zero_point=41, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                )
+                (channel_projection): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=56, out_features=112, scale=0.0213131383061409, zero_point=59, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=112, out_features=56, scale=0.010679631493985653, zero_point=59, qscheme=torch.per_channel_affine)
+                )
+                (squeeze): AdaptiveAvgPool1d(output_size=1)
+                (excitation): Sequential(
+                  (0): QuantizedLinear(in_features=56, out_features=7, scale=0.0010156126227229834, zero_point=43, qscheme=torch.per_channel_affine)
+                  (1): ReLU()
+                  (2): QuantizedLinear(in_features=7, out_features=56, scale=0.0048235394060611725, zero_point=64, qscheme=torch.per_channel_affine)
+                  (3): Sigmoid()
+                )
+                (channel_mixer_F): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=256, scale=0.003301694756373763, zero_point=56, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=256, out_features=128, scale=0.002922717947512865, zero_point=72, qscheme=torch.per_channel_affine)
+                )
+              )
+            )
+            (1): Sequential(
+              (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): ShiftBlock(
+                (channel_mixer_S): Sequential(
+                  (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                  (1): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=128, scale=0.031001921743154526, zero_point=52, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                )
+                (channel_projection): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=56, out_features=112, scale=0.017576206475496292, zero_point=52, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=112, out_features=56, scale=0.011383112519979477, zero_point=84, qscheme=torch.per_channel_affine)
+                )
+                (squeeze): AdaptiveAvgPool1d(output_size=1)
+                (excitation): Sequential(
+                  (0): QuantizedLinear(in_features=56, out_features=7, scale=0.0007568846340291202, zero_point=78, qscheme=torch.per_channel_affine)
+                  (1): ReLU()
+                  (2): QuantizedLinear(in_features=7, out_features=56, scale=0.0045705437660217285, zero_point=65, qscheme=torch.per_channel_affine)
+                  (3): Sigmoid()
+                )
+                (channel_mixer_F): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=256, scale=0.0037659616209566593, zero_point=51, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=256, out_features=128, scale=0.0031024517957121134, zero_point=70, qscheme=torch.per_channel_affine)
+                )
+              )
+            )
+          )
+          (TokenMixer): ModuleList(
+            (0): Sequential(
+              (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): MlpBlock(
+                (linear): QuantizedLinear(in_features=56, out_features=112, scale=0.05949868634343147, zero_point=59, qscheme=torch.per_channel_affine)
+                (act): ReLU()
+                (dropout): QuantizedDropout(p=0.1, inplace=False)
+              )
+              (2): QuantizedLinear(in_features=112, out_features=56, scale=0.05004790052771568, zero_point=44, qscheme=torch.per_channel_affine)
+            )
+            (1): Sequential(
+              (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): MlpBlock(
+                (linear): QuantizedLinear(in_features=56, out_features=112, scale=0.11167886853218079, zero_point=62, qscheme=torch.per_channel_affine)
+                (act): ReLU()
+                (dropout): QuantizedDropout(p=0.1, inplace=False)
+              )
+              (2): QuantizedLinear(in_features=112, out_features=56, scale=0.10960137099027634, zero_point=53, qscheme=torch.per_channel_affine)
+            )
+          )
+          (downsample): Downsample(
+            (norm): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (reduction): QuantizedConv1d(128, 128, kernel_size=(2,), stride=(2,), scale=0.07942869514226913, zero_point=63)
+          )
+        )
+        (1): BasicLayer(
+          (Shift): ModuleList(
+            (0): Sequential(
+              (0): BatchNorm1d(28, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): ShiftBlock(
+                (channel_mixer_S): Sequential(
+                  (0): BatchNorm1d(28, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                  (1): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=128, scale=0.022329434752464294, zero_point=53, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                )
+                (channel_projection): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=28, out_features=56, scale=0.012376847676932812, zero_point=44, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=56, out_features=28, scale=0.005763854365795851, zero_point=61, qscheme=torch.per_channel_affine)
+                )
+                (squeeze): AdaptiveAvgPool1d(output_size=1)
+                (excitation): Sequential(
+                  (0): QuantizedLinear(in_features=28, out_features=3, scale=0.0009946520440280437, zero_point=96, qscheme=torch.per_channel_affine)
+                  (1): ReLU()
+                  (2): QuantizedLinear(in_features=3, out_features=28, scale=0.007241029758006334, zero_point=62, qscheme=torch.per_channel_affine)
+                  (3): Sigmoid()
+                )
+                (channel_mixer_F): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=256, scale=0.0027890093624591827, zero_point=57, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=256, out_features=128, scale=0.002808361081406474, zero_point=67, qscheme=torch.per_channel_affine)
+                )
+              )
+            )
+            (1): Sequential(
+              (0): BatchNorm1d(28, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): ShiftBlock(
+                (channel_mixer_S): Sequential(
+                  (0): BatchNorm1d(28, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                  (1): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=128, scale=0.018585730344057083, zero_point=61, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                )
+                (channel_projection): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=28, out_features=56, scale=0.00727816391736269, zero_point=49, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=56, out_features=28, scale=0.0028238098602741957, zero_point=65, qscheme=torch.per_channel_affine)
+                )
+                (squeeze): AdaptiveAvgPool1d(output_size=1)
+                (excitation): Sequential(
+                  (0): QuantizedLinear(in_features=28, out_features=3, scale=0.0012168893590569496, zero_point=50, qscheme=torch.per_channel_affine)
+                  (1): ReLU()
+                  (2): QuantizedLinear(in_features=3, out_features=28, scale=0.007232688367366791, zero_point=61, qscheme=torch.per_channel_affine)
+                  (3): Sigmoid()
+                )
+                (channel_mixer_F): Sequential(
+                  (0): MlpBlock(
+                    (linear): QuantizedLinear(in_features=128, out_features=256, scale=0.0016658080276101828, zero_point=50, qscheme=torch.per_channel_affine)
+                    (act): ReLU()
+                    (dropout): QuantizedDropout(p=0.1, inplace=False)
+                  )
+                  (1): QuantizedLinear(in_features=256, out_features=128, scale=0.0020236640702933073, zero_point=75, qscheme=torch.per_channel_affine)
+                )
+              )
+            )
+          )
+          (TokenMixer): ModuleList(
+            (0): Sequential(
+              (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): MlpBlock(
+                (linear): QuantizedLinear(in_features=28, out_features=56, scale=0.078315369784832, zero_point=66, qscheme=torch.per_channel_affine)
+                (act): ReLU()
+                (dropout): QuantizedDropout(p=0.1, inplace=False)
+              )
+              (2): QuantizedLinear(in_features=56, out_features=28, scale=0.050727296620607376, zero_point=59, qscheme=torch.per_channel_affine)
+            )
+            (1): Sequential(
+              (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (1): MlpBlock(
+                (linear): QuantizedLinear(in_features=28, out_features=56, scale=0.11108327656984329, zero_point=62, qscheme=torch.per_channel_affine)
+                (act): ReLU()
+                (dropout): QuantizedDropout(p=0.1, inplace=False)
+              )
+              (2): QuantizedLinear(in_features=56, out_features=28, scale=0.0823676660656929, zero_point=52, qscheme=torch.per_channel_affine)
+            )
+          )
+        )
+      )
+    )
+    (head): Sequential(
+      (0): QuantizedLinear(in_features=128, out_features=64, scale=0.23533840477466583, zero_point=65, qscheme=torch.per_channel_affine)
+      (1): QuantizedLinear(in_features=64, out_features=6, scale=0.3431853950023651, zero_point=50, qscheme=torch.per_channel_affine)
+    )
+  )
+)

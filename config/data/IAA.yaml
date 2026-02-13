@@ -3,9 +3,9 @@ defaults:
   - _self_
 
 dataset_name: "UoG IAA"
-train_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA/train"
-val_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA/val"
-test_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA/test"
+train_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_people_split/train"
+val_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_people_split/val"
+test_dir: "/home/eslab/Vscode/MultiPatchdopplerMLP/data/IAA_people_split/test"
 input_size: 224
 random_state: 42
 num_classes: 6

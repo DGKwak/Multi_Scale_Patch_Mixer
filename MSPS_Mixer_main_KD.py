@@ -17,38 +17,47 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
 
-from model.MSPS_Mixer import MultiscaleMixer
-# from model.MSPS_Mixer_RMS import MultiscaleMixer
-# from model.MSPS_Mixer_rev01 import MultiscaleMixer
-# from model.MSPS_Mixer_rev_RMS import MultiscaleMixer
+import model.MSPS_Mixer as MSPS
+import model.MSPS_Mixer_rev01 as MSPS_rev01
 from utils.earlystopping import EarlyStopping
 from utils.logger import create_logger
 
-def make_datasets(tr_transform,
-                  v_transform,
-                  train_dir,
-                  val_dir,
-                  test_dir,):
-    # 데이터셋 로드
-    train_transform = instantiate(tr_transform)
-    val_transform = instantiate(v_transform)
+def student_dataset(train_dir,
+                    val_dir,
+                    test_dir):
+    train_transforms = transforms.Compose([
+        transforms.Resize((96, 96)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225]),
+    ])
+    val_transforms = transforms.Compose([
+        transforms.Resize((96, 96)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225]),
+    ])
 
-    train_dataset = datasets.ImageFolder(root=train_dir, transform=train_transform)
-    val_dataset = datasets.ImageFolder(root=val_dir, transform=val_transform)
-    test_dataset = datasets.ImageFolder(root=test_dir, transform=val_transform)
+    train_dataset = datasets.ImageFolder(root=train_dir, transform=train_transforms)
+    val_dataset = datasets.ImageFolder(root=val_dir, transform=val_transforms)
+    test_dataset = datasets.ImageFolder(root=test_dir, transform=val_transforms)
 
     return train_dataset, val_dataset, test_dataset
+
+def teacher_datasets(t_transform,
+                     train_dir,):
+    train_transform = instantiate(t_transform)
+
+    train_dataset = datasets.ImageFolder(root=train_dir, transform=train_transform)
+
+    return train_dataset
 
 def make_dataloaders(train_dataset,
                      val_dataset,
                      test_dataset,
                      num_workers,
                      batch_size,
-                     random_state):
-
-    generator = torch.Generator()
-    generator.manual_seed(random_state)
-
+                     generator):
     # DataLoader
     train_loader = DataLoader(train_dataset,
                               num_workers=num_workers,
@@ -82,53 +91,52 @@ def set_seed(seed_value):
 
     # torch.use_deterministic_algorithms(True)
 
-def train(model, 
-          loader, 
+def train(student_model,
+          teacher_model, 
+          student_loader,
+          teacher_loader,
           optimizer, 
           cross_entropy,
+          KLDivLoss,
           lambda_aux,
+          temperature,
           device, 
           scheduler):
-    model.train()
+    student_model.train()
 
     total_loss = 0.0
     correct = 0
 
-    for x, y in loader:
+    for (x, y), (x_t, y_t) in zip(student_loader, teacher_loader):
         if y.ndim == 2:
             y = torch.argmax(y, dim=1)
         
         x, y = x.to(device), y.to(device)
+        x_t, y_t = x_t.to(device), y_t.to(device)
 
         optimizer.zero_grad()
-        logit, z = model(x)
+        logit = student_model(x)
+        t_logit = teacher_model(x_t)
 
         ce_loss = cross_entropy(logit, y)
-        aux_loss = 0
 
-        for out in z:
-            if out.ndim > 2:
-                out = torch.mean(out, dim=2, keepdim=False)
-            
-            aux_loss += cross_entropy(out, y)
+        student_soft_label = nn.functional.log_softmax(logit / temperature, dim=1)
+        teacher_soft_label = nn.functional.softmax(t_logit / temperature, dim=1)
+        kl_loss = KLDivLoss(student_soft_label, teacher_soft_label) * (temperature ** 2)
 
-        if len(z) == 1:
-            aux_loss = 0
-
-        loss = ce_loss + lambda_aux * aux_loss
+        loss = ce_loss + lambda_aux * kl_loss
         loss.backward()
         optimizer.step()
         scheduler.step()
 
         total_loss += loss.item() * x.size(0)
         correct += (logit.argmax(1) == y).sum().item()
-    
-    return total_loss / len(loader.dataset), correct / len(loader.dataset)
+
+    return total_loss / len(student_loader.dataset), correct / len(student_loader.dataset)
 
 def evaluate(model, 
              loader, 
              cross_entropy,
-             lambda_aux, 
              device):
     model.eval()
 
@@ -142,25 +150,13 @@ def evaluate(model,
             
             x, y = x.to(device), y.to(device)
 
-            logit, z = model(x)
+            logit = model(x)
 
             correct += (logit.argmax(1) == y).sum().item()
 
             ce_loss = cross_entropy(logit, y)
-            aux_loss = 0
 
-            for out in z:
-                if out.ndim > 2:
-                    out = torch.mean(out, dim=2, keepdim=False)
-            
-                aux_loss += cross_entropy(out, y)
-
-            if len(z) == 1:
-                aux_loss = 0
-
-            loss = ce_loss + lambda_aux * aux_loss
-
-            total_loss += loss.item() * x.size(0)
+            total_loss += ce_loss.item() * x.size(0)
 
     return total_loss / len(loader.dataset), correct / len(loader.dataset)
 
@@ -184,7 +180,7 @@ def test(model,
             
             x, y = x.to(device), y.to(device)
             
-            logits, z = model(x)
+            logits = model(x)
             predictions = logits.argmax(1)
             
             all_predictions.extend(predictions.cpu().numpy())
@@ -217,7 +213,7 @@ def plot_confusion_matrix(y_true, y_pred, class_names, experiment_name, save_pat
     
     return cm_path
 
-@hydra.main(config_path='./config', config_name='config_STFT', version_base=None)
+@hydra.main(config_path='./config', config_name='MSPS_Mixer_KD', version_base=None)
 def main(cfg):
     metadata = {
         'Experiment Name': cfg.experiment_name,
@@ -245,48 +241,56 @@ def main(cfg):
         device = torch.device('cpu')
     logger.info(f"Using device: {device}")
 
-    train_dataset, val_dataset, test_dataset = make_datasets(cfg.data.train,
-                                                             cfg.data.val,
-                                                             cfg.data.train_dir,
+    stu_train_dataset, stu_val_dataset, stu_test_dataset = student_dataset(cfg.data.train_dir,
                                                              cfg.data.val_dir,
-                                                             cfg.data.test_dir,)
+                                                             cfg.data.test_dir)
     
+    tea_train_dataset = teacher_datasets(cfg.data.train,
+                                      cfg.data.train_dir)
+
     # 데이터셋 정보 출력
-    logger.info(f"총 데이터셋 크기: {len(train_dataset)}")
-    logger.info(f"검증 데이터셋 크기: {len(val_dataset)}")
-    logger.info(f"클래스 수: {len(train_dataset.classes)}")
-    logger.info(f"클래스 목록: {train_dataset.classes}")
-    
-    train_loader, val_loader, test_loader = make_dataloaders(train_dataset,
-                                                            val_dataset,
-                                                            test_dataset,
+    logger.info(f"총 데이터셋 크기: {len(stu_train_dataset)}")
+    logger.info(f"검증 데이터셋 크기: {len(stu_val_dataset)}")
+    logger.info(f"클래스 수: {len(stu_train_dataset.classes)}")
+    logger.info(f"클래스 목록: {stu_train_dataset.classes}")
+
+    generator = torch.Generator()
+    generator.manual_seed(cfg.random_state)
+
+    train_loader, val_loader, test_loader = make_dataloaders(stu_train_dataset,
+                                                            stu_val_dataset,
+                                                            stu_test_dataset,
                                                             cfg.num_workers,
                                                             cfg.batch_size,
-                                                            cfg.data.random_state)
+                                                            generator)
+    
+    teacher_loader = DataLoader(tea_train_dataset, 
+                                num_workers=cfg.num_workers,
+                                batch_size=cfg.batch_size,
+                                shuffle=True,
+                                generator=generator)
     
     set_seed(cfg.random_state)
-    
-    # Model
-    model = MultiscaleMixer(
-        in_channels=cfg.model.in_channels,
-        patch_dim=cfg.model.patch_dim,
-        num_layers=cfg.model.num_layers,
-        dropout=cfg.model.dropout,
-        patches=cfg.model.patches,
-        stride=cfg.model.stride,
-        shift_size=cfg.model.shift_size,
-        shift=cfg.model.shift,
-        num_patches=cfg.model.num_patches,
-        act=cfg.model.activation,
-    ).to(device)
 
+    # Model
+    student_model = MSPS_rev01.MultiscaleMixer(
+        patch_dim=64,
+        num_layers=cfg.model.num_layers,
+        patches=[(96, 2), (96, 4)],
+        stride=[(96, 2), (96, 4)],
+        num_patches=[48, 24]).to(device)
+    
+    teacher_model = MSPS.MultiscaleMixer()
+    teacher_model.load_state_dict(torch.load('./checkpoints/teacher_model.pth', map_location=device))
+    teacher_model.to(device)
+    teacher_model.eval()
     # loss Function
     cross_entropy = nn.CrossEntropyLoss()
+    KLDivLoss = nn.KLDivLoss(reduction='batchmean')
 
     # Optimizer & Scheduler
-    optimizer = torch.optim.Adam(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
+    optimizer = torch.optim.Adam(student_model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
     scheduler = CosineAnnealingLR(optimizer, T_max=cfg.epochs, eta_min=1e-6)
-    # scheduler = ExponentialLR(optimizer, gamma=0.9)
     
     early_stopping = EarlyStopping(patience=30, mode='min', verbose=True)
 
@@ -302,18 +306,21 @@ def main(cfg):
     results = []
 
     for epoch in tqdm(range(cfg.epochs)):
-        train_loss, train_acc = train(model,
+        train_loss, train_acc = train(student_model,
+                                      teacher_model,
                                       train_loader,
+                                      teacher_loader,
                                       optimizer,
                                       cross_entropy,
+                                      KLDivLoss,
                                       cfg.lambda_aux,
+                                      cfg.temperature,
                                       device,
                                       scheduler)
         
-        val_loss, val_acc = evaluate(model,
+        val_loss, val_acc = evaluate(student_model,
                                      val_loader,
                                      cross_entropy,
-                                     cfg.lambda_aux,
                                      device)
         
         train_accuracies.append(train_acc)
@@ -334,7 +341,7 @@ def main(cfg):
         # 최적의 모델 저장 로직
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            torch.save(model.state_dict(), best_model_path)
+            torch.save(student_model.state_dict(), best_model_path)
             logger.info(f"Epoch {epoch + 1}: 검증 손실이 감소했습니다. 최적의 모델을 {best_model_path}에 저장했습니다.")
 
         logger.info(f"lr : {scheduler.get_last_lr()[0]} \n Epoch {epoch + 1}/{cfg.epochs}, Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
@@ -369,12 +376,12 @@ def main(cfg):
 
     # 최적 모델 로드
     if os.path.exists(best_model_path):
-        model.load_state_dict(torch.load(best_model_path, map_location=device))
+        student_model.load_state_dict(torch.load(best_model_path, map_location=device))
         logger.info(f"최적 모델 로드 완료: {best_model_path}")
         
         # 테스트 수행
-        test_accuracy, predictions, targets = test(model, test_loader, device)
-        
+        test_accuracy, predictions, targets = test(student_model, test_loader, device)
+
         logger.info(f"테스트 정확도: {test_accuracy:.4f}")
         
         # Classification Report 출력
@@ -383,7 +390,7 @@ def main(cfg):
 
         # Confusion Matrix 생성 및 저장
         plot_save_path = cfg.confusion_path
-        cm_path = plot_confusion_matrix(targets, predictions, train_dataset.classes, 
+        cm_path = plot_confusion_matrix(targets, predictions, stu_train_dataset.classes, 
                                         cfg.experiment_name, plot_save_path)
         
         logger.info(f"Confusion matrix saved to {cm_path}")
@@ -405,7 +412,7 @@ def main(cfg):
             f.write("\n")
             # 클래스별 정확도도 저장
             f.write("# Classification Report\n")
-            f.write(classification_report(targets, predictions, target_names=train_dataset.classes))
+            f.write(classification_report(targets, predictions, target_names=stu_train_dataset.classes))
 
         logger.info(f"Test results saved to {test_results_path}")
 

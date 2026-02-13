@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import einops
 
 # Select Activation Function
 def get_activation(activation):
@@ -41,8 +42,8 @@ def channel_shift(x, shift=[-1, 0, 1], shift_size=3):
     shifted_chunks = []
 
     for chunk, sh in zip(x_chunk, shift):
-        # shifted = torch.roll(chunk, shifts=sh, dims=2)
-        shifted = shift_with_padding(chunk, sh, dim=2)
+        shifted = torch.roll(chunk, shifts=sh, dims=2)
+        # shifted = shift_with_padding(chunk, sh, dim=2)
         shifted_chunks.append(shifted)
     
     x_shifted = torch.cat(shifted_chunks, dim=1)
@@ -134,10 +135,10 @@ class ShiftBlock(nn.Module):
         x_shift = self.channel_projection(x_shift)
         x_shift = x_shift.permute(0, 2, 1)  # (B, N, C)
 
-        se = self.squeeze(x_shift)  # (B, N, 1)
-        se = se.permute(0, 2, 1)  # (B, 1, N)
+        se = self.squeeze(x_shift)
+        se = se.squeeze()  # (B, N)
         ex = self.excitation(se)
-        ex = ex.permute(0, 2, 1)  # (B, N, 1)
+        ex = ex.unsqueeze(-1)  # (B, N, 1)
         z = x_shift * ex
 
         z = self.channel_mixer_F(z) + res
@@ -149,18 +150,22 @@ class Downsample(nn.Module):
                  in_channels:int):
         super().__init__()
 
-        self.norm = nn.LayerNorm(in_channels)
-        self.reduction = nn.Conv1d(in_channels,
+        self.norm = nn.LayerNorm(in_channels*2)
+        self.reduction = nn.Conv1d(in_channels*2,
                                    in_channels,
-                                   kernel_size=2,
-                                   stride=2,)
+                                   kernel_size=1,
+                                   stride=1,)
 
     def forward(self, x):
         B, C, N = x.shape
 
-        x = x.permute(0, 2, 1)  # (B, N, C)
+        x0 = x[:, :, 0::2]
+        x1 = x[:, :, 1::2]
+        x = torch.cat([x0, x1], dim=1)  # 채널 방향으로 concat
+
+        x = x.permute(0, 2, 1)  # (B, N, C*2)
         x = self.norm(x)
-        x = x.permute(0, 2, 1)  # (B, C, N)
+        x = x.permute(0, 2, 1)  # (B, C*2, N)
         x = self.reduction(x)
 
         return x
@@ -308,7 +313,7 @@ class MultiscaleMixer(nn.Module):
         for p_idx in range(len(self.patches)):
             # Patch Embedding
             z = self.patch_embedding[p_idx](x)
-            z = z.flatten(2)  # (B, C, N)
+            z = z.flatten(2) # (B, C, N)
 
             # Positional Embedding
             z = self.positional_embedding[p_idx](z)

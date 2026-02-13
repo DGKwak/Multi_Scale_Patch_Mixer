@@ -1,0 +1,229 @@
+=== FP32 Model ===
+MultiscaleMixer(
+  (patch_embedding): ModuleList(
+    (0): Conv2d(3, 128, kernel_size=(224, 2), stride=(224, 2))
+    (1): Conv2d(3, 128, kernel_size=(224, 4), stride=(224, 4))
+  )
+  (blocks): ModuleList(
+    (0): ModuleList(
+      (0): BasicLayer(
+        (Shift): ModuleList(
+          (0-1): 2 x Sequential(
+            (0): BatchNorm1d(112, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (1): ShiftBlock(
+              (channel_mixer_S): Sequential(
+                (0): BatchNorm1d(112, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (1): MlpBlock(
+                  (linear): Linear(in_features=128, out_features=128, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+              )
+              (channel_projection): Sequential(
+                (0): MlpBlock(
+                  (linear): Linear(in_features=112, out_features=224, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+                (1): Linear(in_features=224, out_features=112, bias=True)
+              )
+              (squeeze): AdaptiveAvgPool1d(output_size=1)
+              (excitation): Sequential(
+                (0): Linear(in_features=112, out_features=14, bias=True)
+                (1): ReLU()
+                (2): Linear(in_features=14, out_features=112, bias=True)
+                (3): Sigmoid()
+              )
+              (channel_mixer_F): Sequential(
+                (0): MlpBlock(
+                  (linear): Linear(in_features=128, out_features=256, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+                (1): Linear(in_features=256, out_features=128, bias=True)
+              )
+            )
+          )
+        )
+        (TokenMixer): ModuleList(
+          (0-1): 2 x Sequential(
+            (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (1): MlpBlock(
+              (linear): Linear(in_features=112, out_features=224, bias=True)
+              (act): ReLU()
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (2): Linear(in_features=224, out_features=112, bias=True)
+          )
+        )
+        (downsample): Downsample(
+          (norm): BatchNorm1d(112, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (reduction): Conv1d(128, 128, kernel_size=(2,), stride=(2,))
+        )
+      )
+      (1): BasicLayer(
+        (Shift): ModuleList(
+          (0-1): 2 x Sequential(
+            (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (1): ShiftBlock(
+              (channel_mixer_S): Sequential(
+                (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (1): MlpBlock(
+                  (linear): Linear(in_features=128, out_features=128, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+              )
+              (channel_projection): Sequential(
+                (0): MlpBlock(
+                  (linear): Linear(in_features=56, out_features=112, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+                (1): Linear(in_features=112, out_features=56, bias=True)
+              )
+              (squeeze): AdaptiveAvgPool1d(output_size=1)
+              (excitation): Sequential(
+                (0): Linear(in_features=56, out_features=7, bias=True)
+                (1): ReLU()
+                (2): Linear(in_features=7, out_features=56, bias=True)
+                (3): Sigmoid()
+              )
+              (channel_mixer_F): Sequential(
+                (0): MlpBlock(
+                  (linear): Linear(in_features=128, out_features=256, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+                (1): Linear(in_features=256, out_features=128, bias=True)
+              )
+            )
+          )
+        )
+        (TokenMixer): ModuleList(
+          (0-1): 2 x Sequential(
+            (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (1): MlpBlock(
+              (linear): Linear(in_features=56, out_features=112, bias=True)
+              (act): ReLU()
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (2): Linear(in_features=112, out_features=56, bias=True)
+          )
+        )
+      )
+    )
+    (1): ModuleList(
+      (0): BasicLayer(
+        (Shift): ModuleList(
+          (0-1): 2 x Sequential(
+            (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (1): ShiftBlock(
+              (channel_mixer_S): Sequential(
+                (0): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (1): MlpBlock(
+                  (linear): Linear(in_features=128, out_features=128, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+              )
+              (channel_projection): Sequential(
+                (0): MlpBlock(
+                  (linear): Linear(in_features=56, out_features=112, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+                (1): Linear(in_features=112, out_features=56, bias=True)
+              )
+              (squeeze): AdaptiveAvgPool1d(output_size=1)
+              (excitation): Sequential(
+                (0): Linear(in_features=56, out_features=7, bias=True)
+                (1): ReLU()
+                (2): Linear(in_features=7, out_features=56, bias=True)
+                (3): Sigmoid()
+              )
+              (channel_mixer_F): Sequential(
+                (0): MlpBlock(
+                  (linear): Linear(in_features=128, out_features=256, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+                (1): Linear(in_features=256, out_features=128, bias=True)
+              )
+            )
+          )
+        )
+        (TokenMixer): ModuleList(
+          (0-1): 2 x Sequential(
+            (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (1): MlpBlock(
+              (linear): Linear(in_features=56, out_features=112, bias=True)
+              (act): ReLU()
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (2): Linear(in_features=112, out_features=56, bias=True)
+          )
+        )
+        (downsample): Downsample(
+          (norm): BatchNorm1d(56, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (reduction): Conv1d(128, 128, kernel_size=(2,), stride=(2,))
+        )
+      )
+      (1): BasicLayer(
+        (Shift): ModuleList(
+          (0-1): 2 x Sequential(
+            (0): BatchNorm1d(28, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (1): ShiftBlock(
+              (channel_mixer_S): Sequential(
+                (0): BatchNorm1d(28, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (1): MlpBlock(
+                  (linear): Linear(in_features=128, out_features=128, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+              )
+              (channel_projection): Sequential(
+                (0): MlpBlock(
+                  (linear): Linear(in_features=28, out_features=56, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+                (1): Linear(in_features=56, out_features=28, bias=True)
+              )
+              (squeeze): AdaptiveAvgPool1d(output_size=1)
+              (excitation): Sequential(
+                (0): Linear(in_features=28, out_features=3, bias=True)
+                (1): ReLU()
+                (2): Linear(in_features=3, out_features=28, bias=True)
+                (3): Sigmoid()
+              )
+              (channel_mixer_F): Sequential(
+                (0): MlpBlock(
+                  (linear): Linear(in_features=128, out_features=256, bias=True)
+                  (act): ReLU()
+                  (dropout): Dropout(p=0.1, inplace=False)
+                )
+                (1): Linear(in_features=256, out_features=128, bias=True)
+              )
+            )
+          )
+        )
+        (TokenMixer): ModuleList(
+          (0-1): 2 x Sequential(
+            (0): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (1): MlpBlock(
+              (linear): Linear(in_features=28, out_features=56, bias=True)
+              (act): ReLU()
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (2): Linear(in_features=56, out_features=28, bias=True)
+          )
+        )
+      )
+    )
+  )
+  (head): Sequential(
+    (0): Linear(in_features=128, out_features=64, bias=True)
+    (1): Linear(in_features=64, out_features=6, bias=True)
+  )
+)
